@@ -18,10 +18,10 @@ namespace Sandbox
         void OnUpdate(float ts)
         {
 			if (m_Player != null)
-				Translation = new Vector3(m_Player.Translation.XY, DistanceFromPlayer);
+				Translation = new Vec3(m_Player.Translation.XY, DistanceFromPlayer);
 
             float speed = 1.0f;
-            Vector3 velocity = Vector3.Zero;
+            Vec3 velocity = Vec3.Zero;
 
             if (Input.IsKeyDown(KeyCode.Up))
                 velocity.Y = 1.0f;
@@ -35,7 +35,7 @@ namespace Sandbox
 
             velocity *= speed;
 
-            Vector3 translation = Translation;
+            Vec3 translation = Translation;
             translation += velocity * ts;
             Translation = translation;
         }

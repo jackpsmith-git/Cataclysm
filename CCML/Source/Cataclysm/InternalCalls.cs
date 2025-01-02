@@ -32,10 +32,10 @@ namespace Cataclysm
 		internal extern static void Rigidbody2DComponent_GetLinearVelocity(ulong entityID, out Vec2 linearVelocity);
 
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
-		internal extern static Rigidbody2DComponent.BodyType Rigidbody2DComponent_GetType(ulong entityID);
+		internal extern static Rigidbody2D.BodyType Rigidbody2DComponent_GetType(ulong entityID);
 
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
-		internal extern static void Rigidbody2DComponent_SetType(ulong entityID, Rigidbody2DComponent.BodyType type);
+		internal extern static void Rigidbody2DComponent_SetType(ulong entityID, Rigidbody2D.BodyType type);
 
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static bool Rigidbody2DComponent_ApplyLinearImpulseToCenter(ulong entityID, ref Vec2 impulse, bool wake);

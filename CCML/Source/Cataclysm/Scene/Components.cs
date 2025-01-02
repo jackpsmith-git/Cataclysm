@@ -14,7 +14,7 @@
 	/// <summary>
 	/// Cataclysm Transform Component
 	/// </summary>
-	public class TransformComponent : Component
+	public class Transform : Component
     {
         public Vec3 Translation
         {
@@ -33,7 +33,7 @@
 	/// <summary>
 	/// Cataclysm Rigidbody2D Component
 	/// </summary>
-	public class Rigidbody2DComponent : Component
+	public class Rigidbody2D : Component
     {
 		/// <summary>
 		/// Rigidbody Type
@@ -70,11 +70,11 @@
     }
 
 	/// <summary>
-	/// Cataclysm Text Component
+	/// Cataclysm text Component
 	/// </summary>
-	public class TextComponent : Component
+	public class Text : Component
 	{
-		public string Text
+		public string text
 		{
 			get => InternalCalls.TextComponent_GetText(Entity.ID);
 			set => InternalCalls.TextComponent_SetText(Entity.ID, value);

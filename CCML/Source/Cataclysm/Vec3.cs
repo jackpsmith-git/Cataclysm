@@ -1,9 +1,9 @@
 ﻿namespace Cataclysm
 {
 	/// <summary>
-	/// Cataclysm Vector3f
+	/// Represents a 3-dimensional floating point vector.
 	/// </summary>
-    public struct Vec3
+	public struct Vec3
     {
         public float X, Y, Z;
 
@@ -30,17 +30,17 @@
 			Z = z;
 		}
 
-        public Vec2 XY
-        {
-            get => new Vec2(X, Y);
-            set
-            {
-                X = value.X;
-                Y = value.Y;
-            }
-        }
+		public Vec2 XY
+		{
+			get => new Vec2(X, Y);
+			set
+			{
+				X = value.X;
+				Y = value.Y;
+			}
+		}
 
-        public static Vec3 operator +(Vec3 a, Vec3 b)
+		public static Vec3 operator +(Vec3 a, Vec3 b)
         {
             return new Vec3(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
         }

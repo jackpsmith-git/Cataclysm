@@ -3,9 +3,9 @@
 namespace Cataclysm
 {
 	/// <summary>
-	/// Cataclysm Vector2f
+	/// Represents a 2-dimensional floating point vector.
 	/// </summary>
-    public struct Vec2
+	public struct Vec2
     {
         public float X, Y;
 
@@ -33,14 +33,14 @@ namespace Cataclysm
             return new Vec2(vector.X * scalar, vector.Y * scalar);
         }
 
-		public float LengthSquared()
+		public float MagnitudeSquared()
 		{
 			return X * X + Y * Y;
 		}
 
-		public float Length()
+		public float Magnitude()
 		{
-			return (float)Math.Sqrt(LengthSquared());
+			return (float)Math.Sqrt(MagnitudeSquared());
 		}
     }
 }
