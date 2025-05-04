@@ -1,4 +1,6 @@
-﻿namespace Cataclysm
+﻿using System;
+
+namespace Cataclysm
 {
 	/// <summary>
 	/// Represents a 3-dimensional floating point vector.
@@ -40,14 +42,12 @@
 			}
 		}
 
-		public static Vec3 operator +(Vec3 a, Vec3 b)
-        {
-            return new Vec3(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
-        }
+		public static Vec3 operator +(Vec3 a, Vec3 b) => new Vec3(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
+        public static Vec3 operator *(Vec3 vector, float scalar) => new Vec3(vector.X * scalar, vector.Y * scalar, vector.Z * scalar);
 
-        public static Vec3 operator *(Vec3 vector, float scalar)
-        {
-            return new Vec3(vector.X * scalar, vector.Y * scalar, vector.Z * scalar);
-        }
-    }
+		public float MagnitudeSquared() => ((X * X) + (Y * Y) + (Z * Z));
+		public float Magnitude() => (float)Math.Sqrt(MagnitudeSquared());
+
+		public override string ToString() => $"({X}, {Y}, {Z})";
+	}
 }

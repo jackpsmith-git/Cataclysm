@@ -1,10 +1,9 @@
 #pragma once
 
-// Core
 #include "Cataclysm/Core/Core.h"
-
 #include "Cataclysm/Core/Window.h"
 #include "Cataclysm/Core/LayerStack.h"
+
 #include "Cataclysm/Events/Event.h"
 #include "Cataclysm/Events/ApplicationEvent.h"
 

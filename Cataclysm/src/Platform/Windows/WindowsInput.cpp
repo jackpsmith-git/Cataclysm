@@ -1,19 +1,19 @@
 #include "ccpch.h"
-#include "Cataclysm/Core/Input.h"
+#include "Cataclysm/Input/Input.h"
 
 #include "GLFW/glfw3.h"
 #include "Cataclysm/Core/Application.h"
 
 namespace Cataclysm
 {
-	bool Input::IsKeyPressed(KeyCode key)
+	bool Input::IsKeyDown(KeyCode key)
 	{
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 		auto state = glfwGetKey(window, static_cast<int32_t>(key));
 		return state == GLFW_PRESS;
 	}
 
-	bool Input::IsMouseButtonPressed(MouseCode button)
+	bool Input::IsMouseButtonDown(MouseCode button)
 	{
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 		auto state = glfwGetMouseButton(window, static_cast<int32_t>(button));

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Event.h"
-#include "Cataclysm/Core/Input.h"
+#include "Cataclysm/Input/Input.h"
 
 namespace Cataclysm
 {

@@ -46,7 +46,7 @@ namespace Cataclysm
 		msdfgen::FontHandle* font = msdfgen::loadFont(ft, fileString.c_str());
 		if (!font)
 		{
-			CC_CORE_ERROR("Failed to load font: {}", fileString);
+			CC_CORE_ERROR("[Font::Font] Failed to load font: {}", fileString);
 			return;
 		}
 
@@ -70,7 +70,7 @@ namespace Cataclysm
 		double fontScale = 1.0;
 		m_Data->FontGeometry = msdf_atlas::FontGeometry(&m_Data->Glyphs);
 		int glyphsLoaded = m_Data->FontGeometry.loadCharset(font, fontScale, charset);
-		CC_CORE_INFO("Loaded {} glyphs from font (out of {})", glyphsLoaded, charset.size());
+		// CC_CORE_INFO("[Font::Font] Loaded {} glyphs from font (out of {})", glyphsLoaded, charset.size());
 		
 		double emSize = 40.0;
 

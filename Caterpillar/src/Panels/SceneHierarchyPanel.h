@@ -4,7 +4,7 @@
 #include "Cataclysm/Core/Core.h"
 #include "Cataclysm/Core/Log.h"
 #include "Cataclysm/Scene/Scene.h"
-#include "Cataclysm/Scene/Entity.h"
+#include "Cataclysm/ECS/Entity.h"
 
 namespace Cataclysm
 {

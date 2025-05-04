@@ -1,0 +1,5 @@
+Project:
+  Name: Pinball
+  StartScene: "Scenes/Pinball.ccscene"
+  AssetDirectory: "Assets"
+  ScriptModulePath: "Scripts/Binaries/Pinball.dll"

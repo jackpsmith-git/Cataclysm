@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Cataclysm/Scene/Components.h"
+#include "Cataclysm/ECS/Components.h"
 #include "box2d/b2_body.h"
 
 namespace Cataclysm 

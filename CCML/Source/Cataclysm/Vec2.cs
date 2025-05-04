@@ -23,24 +23,12 @@ namespace Cataclysm
             Y = y;
         }
 
-        public static Vec2 operator *(Vec2 a, Vec2 b)
-        {
-            return new Vec2(a.X + b.X, a.Y + b.Y);
-        }
+        public static Vec2 operator *(Vec2 a, Vec2 b) => new Vec2(a.X + b.X, a.Y + b.Y);
+        public static Vec2 operator *(Vec2 vector, float scalar) => new Vec2(vector.X * scalar, vector.Y * scalar);
 
-        public static Vec2 operator *(Vec2 vector, float scalar)
-        {
-            return new Vec2(vector.X * scalar, vector.Y * scalar);
-        }
+		public float MagnitudeSquared() => ((X * X) + (Y * Y));
+		public float Magnitude() => (float)Math.Sqrt(MagnitudeSquared());
 
-		public float MagnitudeSquared()
-		{
-			return X * X + Y * Y;
-		}
-
-		public float Magnitude()
-		{
-			return (float)Math.Sqrt(MagnitudeSquared());
-		}
-    }
+		public override string ToString() => $"({X}, {Y})";
+	}
 }

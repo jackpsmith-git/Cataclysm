@@ -3,6 +3,8 @@
 #include "Cataclysm.h"
 #include "Panels/SceneHierarchyPanel.h"
 #include "Panels/BrowserPanel.h"
+#include "Panels/FrameDebuggerPanel.h"
+#include "Panels/OutputPanel.h"
 
 #include "Cataclysm/Renderer/EditorCamera.h"
 
@@ -18,7 +20,7 @@ namespace Cataclysm
 		virtual void OnDetach() override;
 
 		void OnUpdate(Cataclysm::Timestep ts) override;
-		virtual void OnImGuiRender() override;
+		virtual void OnImGuiRender(Timestep ts) override;
 		void OnEvent(Cataclysm::Event& e) override;
 	private:
 		bool OnKeyPressed(Cataclysm::KeyPressedEvent& e);
@@ -89,6 +91,8 @@ namespace Cataclysm
 		// Panels
 		Cataclysm::SceneHierarchyPanel m_SceneHierarchyPanel;
 		Scope<BrowserPanel> m_BrowserPanel;
+		Scope<FrameDebuggerPanel> m_FrameDebuggerPanel;
+		Scope<OutputPanel> m_OutputPanel;
 
 		Cataclysm::Ref<Cataclysm::Texture2D> m_IconPlay, m_IconPause, m_IconStep, m_IconSimulate, m_IconStop;
 	};

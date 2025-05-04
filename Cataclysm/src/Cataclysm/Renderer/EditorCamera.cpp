@@ -1,9 +1,9 @@
 #include "ccpch.h"
 #include "EditorCamera.h"
 
-#include "Cataclysm/Core/Input.h"
-#include "Cataclysm/Core/KeyCodes.h"
-#include "Cataclysm/Core/MouseCodes.h"
+#include "Cataclysm/Input/Input.h"
+#include "Cataclysm/Input/KeyCodes.h"
+#include "Cataclysm/Input/MouseCodes.h"
 
 #include <GLFW/glfw3.h>
 
@@ -24,9 +24,9 @@ namespace Cataclysm
 		glm::vec2 delta = (mouse - m_InitialMousePosition) * 0.003f;
 		m_InitialMousePosition = mouse;
 
-		if (Input::IsMouseButtonPressed(Mouse::ButtonMiddle))
+		if (Input::IsMouseButtonDown(Mouse::ButtonMiddle))
 			MousePan(delta);
-		else if (Input::IsMouseButtonPressed(Mouse::ButtonRight))
+		else if (Input::IsMouseButtonDown(Mouse::ButtonRight))
 			MouseRotate(delta);
 
 		UpdateView();

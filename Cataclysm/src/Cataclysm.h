@@ -6,9 +6,11 @@
 #include "Cataclysm/Core/Layer.h"
 #include "Cataclysm/Core/Log.h"
 #include "Cataclysm/Core/Timestep.h"
-#include "Cataclysm/Core/Input.h"
-#include "Cataclysm/Core/KeyCodes.h"
-#include "Cataclysm/Core/MouseCodes.h"
+
+// ---Input------------------------------------------
+#include "Cataclysm/Input/Input.h"
+#include "Cataclysm/Input/KeyCodes.h"
+#include "Cataclysm/Input/MouseCodes.h"
 // --------------------------------------------------
 
 // ---ImGui------------------------------------------
@@ -17,16 +19,20 @@
 
 // ---Scene------------------------------------------
 #include "Cataclysm/Scene/Scene.h"
-#include "Cataclysm/Scene/Entity.h"
-#include "Cataclysm/Scene/ScriptableEntity.h"
-#include "Cataclysm/Scene/Components.h"
+// --------------------------------------------------
 
+// ---ECS--------------------------------------------
+#include "Cataclysm/ECS/Components.h"
+#include "Cataclysm/ECS/Entity.h"
+#include "Cataclysm/ECS/ScriptableEntity.h"
+// --------------------------------------------------
+
+// ---Project----------------------------------------
 #include "Cataclysm/Project/Project.h"
 // --------------------------------------------------
 
 // ---Renderer---------------------------------------
 #include "Cataclysm/Renderer/Renderer.h"
-#include "Cataclysm/Renderer/Vesuvius.h"
 #include "Cataclysm/Renderer/RenderCommand.h"
 
 #include "Cataclysm/Renderer/Buffer.h"
@@ -38,4 +44,7 @@
 
 #include "Cataclysm/Renderer/OrthographicCamera.h"
 #include "Cataclysm/Renderer/OrthographicCameraController.h"
+
+	// Vesuvius
+#include "Cataclysm/Renderer/Vesuvius/Vesuvius.h"
 // --------------------------------------------------

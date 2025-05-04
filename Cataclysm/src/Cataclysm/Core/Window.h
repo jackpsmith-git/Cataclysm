@@ -3,27 +3,14 @@
 #include "ccpch.h"
 
 #include "Cataclysm/Core/Core.h"
+#include "Cataclysm/Core/WindowProps.h"
+
 #include "Cataclysm/Events/Event.h"
 
 #include <sstream>
 
 namespace Cataclysm
 {
-	struct WindowProps
-	{
-		std::string Title;
-		uint32_t Width;
-		uint32_t Height;
-
-		WindowProps(const std::string& title = "Cataclysm Engine",
-				uint32_t width = 1600,
-				uint32_t height = 900)
-			: Title(title), Width(width), Height(height)
-		{
-		}
-	};
-
-	// Interface representing a desktop system based window
 	class Window
 	{
 	public:
@@ -36,7 +23,6 @@ namespace Cataclysm
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
 
-		// Window attributes
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
 		virtual void SetVSync(bool enabled) = 0;
 		virtual bool IsVSync() const = 0;

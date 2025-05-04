@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Cataclysm/Scene/Scene.h"
-#include "Cataclysm/Scene/Entity.h"
+#include "Cataclysm/ECS/Entity.h"
 
 #include <filesystem>
 #include <string>
@@ -26,7 +26,7 @@ namespace Cataclysm
 		Bool, Char, Byte, Short, Int, Long,
 		UByte, UShort, UInt, ULong,
 		Vector2, Vector3, Vector4,
-		Entity
+		Entity, String
 	};
 
 	struct ScriptField
@@ -73,6 +73,7 @@ namespace Cataclysm
 	public:
 		ScriptClass() = default;
 		ScriptClass(const std::string& classNamespace, const std::string& className, bool isCore = false);
+
 		MonoObject* Instantiate();
 		MonoMethod* GetMethod(const std::string& name, int parameterCount);
 		MonoObject* InvokeMethod(MonoObject* instance, MonoMethod* method, void** params = nullptr);
@@ -200,6 +201,7 @@ namespace Cataclysm
 				case ScriptFieldType::Vector3:	return "Vector3";
 				case ScriptFieldType::Vector4:	return "Vector4";
 				case ScriptFieldType::Entity:	return "Entity";
+				case ScriptFieldType::String:	return "String";
 			}
 			CC_CORE_ASSERT(false, "Unknown ScriptFieldType");
 			return "None";
@@ -224,6 +226,7 @@ namespace Cataclysm
 			if (fieldType == "Vector3")	return ScriptFieldType::Vector3;
 			if (fieldType == "Vector4")	return ScriptFieldType::Vector4;
 			if (fieldType == "Entity")	return ScriptFieldType::Entity;
+			if (fieldType == "String")  return ScriptFieldType::String;
 
 			CC_CORE_ASSERT(false, "Unknown ScriptFieldType");
 			return ScriptFieldType::None;

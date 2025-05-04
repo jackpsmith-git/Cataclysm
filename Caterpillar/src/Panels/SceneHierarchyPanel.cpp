@@ -1,5 +1,5 @@
 #include "SceneHierarchyPanel.h"
-#include "Cataclysm/Scene/Components.h"
+#include "Cataclysm/ECS/Components.h"
 
 #include "Cataclysm/Scripting/ScriptEngine.h"
 #include "Cataclysm/UI/UI.h"
@@ -48,12 +48,11 @@ namespace Cataclysm
 			// Right-click on blank space
 			if (ImGui::BeginPopupContextWindow(0, 1 | ImGuiPopupFlags_NoOpenOverItems))
 			{
-				if (ImGui::MenuItem("Create Empty Entity"))
+				if (ImGui::MenuItem("New Entity"))
 					m_Context->CreateEntity("Empty Entity");
 
 				ImGui::EndPopup();
 			}
-
 		}
 
 		ImGui::End();
@@ -79,9 +78,19 @@ namespace Cataclysm
 		ImGuiTreeNodeFlags flags = ((m_SelectionContext == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
 		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
-		if (ImGui::IsItemClicked())
+
+
+		if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Left) && !ImGui::IsMouseDragging(ImGuiMouseButton_Left))
 		{
 			m_SelectionContext = entity;
+		}
+
+		Entity* entityPtr = &entity;
+
+		if (ImGui::BeginDragDropSource())
+		{
+			ImGui::SetDragDropPayload("ENTITY_HIERARCHY_ITEM", entityPtr, sizeof(Entity*));
+			ImGui::EndDragDropSource();
 		}
 
 		bool entityDeleted = false;
@@ -110,6 +119,59 @@ namespace Cataclysm
 		}
 	}
 
+	static void DrawVec2Control(const std::string& label, glm::vec2& values, float resetValue = 0.0f, float columnWidth = 100.0f)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		auto boldFont = io.Fonts->Fonts[0];
+
+		ImGui::PushID(label.c_str());
+
+		ImGui::Columns(2);
+		ImGui::SetColumnWidth(0, columnWidth);
+		ImGui::Text(label.c_str());
+		ImGui::NextColumn();
+
+		ImGui::PushMultiItemsWidths(2, ImGui::CalcItemWidth());
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0 , 0 });
+
+		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+		ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+		ImGui::PushFont(boldFont);
+		if (ImGui::Button("X", buttonSize))
+			values.x = resetValue;
+		ImGui::PopFont();
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::PopItemWidth();
+		ImGui::SameLine();
+
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
+		ImGui::PushFont(boldFont);
+		if (ImGui::Button("Y", buttonSize))
+			values.y = resetValue;
+		ImGui::PopFont();
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::PopItemWidth();
+		ImGui::SameLine();
+
+		ImGui::PopStyleVar();
+
+		ImGui::Columns(1);
+
+		ImGui::PopID();
+	}
+
 	static void DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
 	{
 		ImGuiIO& io = ImGui::GetIO();
@@ -123,7 +185,7 @@ namespace Cataclysm
 		ImGui::NextColumn();
 
 		ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0 , 0 });
 
 		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 		ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
@@ -237,6 +299,10 @@ namespace Cataclysm
 		ImGuiIO& io = ImGui::GetIO();
 		auto boldFont = io.Fonts->Fonts[0];
 
+		auto& id = entity.GetComponent<IDComponent>();
+		ImGui::Checkbox(" ", &id.Enabled);
+		ImGui::SameLine();
+
 		if (entity.HasComponent<TagComponent>())
 		{
 			auto& tag = entity.GetComponent<TagComponent>().Tag;
@@ -261,18 +327,23 @@ namespace Cataclysm
 		if (ImGui::BeginPopup("AddComponent"))
 		{
 			DisplayAddComponentEntry<CameraComponent>("Camera");
-			DisplayAddComponentEntry<ScriptComponent>("Script");
-			DisplayAddComponentEntry<SpriteRendererComponent>("Sprite Renderer");
-			DisplayAddComponentEntry<CircleRendererComponent>("Circle Renderer");
-			DisplayAddComponentEntry<Rigidbody2DComponent>("Rigidbody 2D");
-			DisplayAddComponentEntry<BoxCollider2DComponent>("Box Collider 2D");
-			DisplayAddComponentEntry<CircleCollider2DComponent>("Circle Collider 2D");
+			DisplayAddComponentEntry<MonoScriptComponent>("MonoScript");
+			DisplayAddComponentEntry<SpriteRendererComponent>("SpriteRenderer");
+			DisplayAddComponentEntry<CircleRendererComponent>("CircleRenderer");
+			DisplayAddComponentEntry<Rigidbody2DComponent>("Rigidbody2D");
+			DisplayAddComponentEntry<BoxCollider2DComponent>("BoxCollider2D");
+			DisplayAddComponentEntry<CircleCollider2DComponent>("CircleCollider2D");
 			DisplayAddComponentEntry<TextComponent>("Text");
 
 			ImGui::EndPopup();
 		}
 
 		ImGui::PopItemWidth();
+
+		uint64_t uuid = (uint64_t)entity.GetUUID();
+		std::stringstream ss;
+		ss << "UUID: " << uuid;
+		ImGui::Text(ss.str().c_str());
 
 		DrawComponent<TransformComponent>("Transform", entity, [](auto& component)
 		{
@@ -327,7 +398,7 @@ namespace Cataclysm
 				if (camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic)
 				{
 					float orthoSize = camera.GetOrthographicSize();
-					if (ImGui::DragFloat("Size", &orthoSize))
+					if (ImGui::DragFloat("FOV", &orthoSize))
 						camera.SetOrthographicSize(orthoSize);
 
 					float orthoNearClip = camera.GetOrthographicNearClip();
@@ -342,7 +413,7 @@ namespace Cataclysm
 				}
 		});
 
-		DrawComponent<ScriptComponent>("Script", entity, [entity, scene = m_Context](auto& component) mutable
+		DrawComponent<MonoScriptComponent>("MonoScript", entity, [entity, scene = m_Context](auto& component) mutable
 		{
 				bool scriptClassExists = ScriptEngine::EntityClassExists(component.ClassName);
 
@@ -376,6 +447,46 @@ namespace Cataclysm
 									scriptInstance->SetFieldValue(name, data);
 								}
 							}
+							else if (field.Type == ScriptFieldType::Bool)
+							{
+								bool data = scriptInstance->GetFieldValue<bool>(name);
+								if (ImGui::Checkbox(name.c_str(), &data))
+								{
+									scriptInstance->SetFieldValue(name, data);
+								}
+							}
+							else if (field.Type == ScriptFieldType::Int)
+							{
+								int data = scriptInstance->GetFieldValue<int>(name);
+								if (ImGui::DragInt(name.c_str(), &data))
+								{
+									scriptInstance->SetFieldValue(name, data);
+								}
+							}
+							else if (field.Type == ScriptFieldType::Double)
+							{
+								double data = scriptInstance->GetFieldValue<double>(name);
+								if (ImGui::InputDouble(name.c_str(), &data))
+								{
+									scriptInstance->SetFieldValue(name, data);
+								}
+							}
+							else if (field.Type == ScriptFieldType::Entity)
+							{
+								Entity data = scriptInstance->GetFieldValue<Entity>(name);
+
+								ImGui::Button(name.c_str(), ImVec2(100.0f, 0.0f));
+								if (ImGui::BeginDragDropTarget())
+								{
+									if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_HIERARCHY_ITEM"))
+									{
+										Entity* entity = (Entity*)payload->Data;
+										scriptInstance->SetFieldValue(name, entity);
+									}
+									ImGui::EndDragDropTarget();
+								}
+
+							}
 						}
 					}
 				}
@@ -400,6 +511,44 @@ namespace Cataclysm
 									if (ImGui::DragFloat(name.c_str(), &data))
 										scriptField.SetValue(data);
 								}
+								else if (field.Type == ScriptFieldType::Bool)
+								{
+									bool data = scriptField.GetValue<bool>();
+									if (ImGui::Checkbox(name.c_str(), &data))
+										scriptField.SetValue(data);
+								}
+								else if (field.Type == ScriptFieldType::Int)
+								{
+									int data = scriptField.GetValue<int>();
+									if (ImGui::DragInt(name.c_str(), &data))
+									{
+										scriptField.SetValue(data);
+									}
+								}
+								else if (field.Type == ScriptFieldType::Double)
+								{
+									double data = scriptField.GetValue<double>();
+									if (ImGui::InputDouble(name.c_str(), &data))
+									{
+										scriptField.SetValue(data);
+									}
+								}
+								else if (field.Type == ScriptFieldType::Entity)
+								{
+									Entity data = scriptField.GetValue<Entity>();
+
+									ImGui::Button(name.c_str(), ImVec2(100.0f, 0.0f));
+									if (ImGui::BeginDragDropTarget())
+									{
+										if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_HIERARCHY_ITEM"))
+										{
+											Entity* entity = (Entity*)payload->Data;
+											scriptField.SetValue(entity);
+										}
+										ImGui::EndDragDropTarget();
+									}
+
+								}
 							}
 							else
 							{
@@ -414,13 +563,60 @@ namespace Cataclysm
 										fieldInstance.SetValue(data);
 									}
 								}
+								else if (field.Type == ScriptFieldType::Bool)
+								{
+									bool data = false;
+									if (ImGui::Checkbox(name.c_str(), &data))
+									{
+										ScriptFieldInstance& fieldInstance = entityFields[name];
+										fieldInstance.Field = field;
+
+										fieldInstance.SetValue(data);
+									}
+								}
+								else if (field.Type == ScriptFieldType::Int)
+								{
+									int data = 0;
+									if (ImGui::DragInt(name.c_str(), &data))
+									{
+										ScriptFieldInstance& fieldInstance = entityFields[name];
+										fieldInstance.Field = field;
+										fieldInstance.SetValue(data);
+									}
+								}
+								else if (field.Type == ScriptFieldType::Double)
+								{
+									double data = 0.0;
+									if (ImGui::InputDouble(name.c_str(), &data))
+									{
+										ScriptFieldInstance& fieldInstance = entityFields[name];
+										fieldInstance.Field = field;
+										fieldInstance.SetValue(data);
+									}
+								}
+								else if (field.Type == ScriptFieldType::Entity)
+								{
+									ImGui::Button(name.c_str(), ImVec2(100.0f, 0.0f));
+									if (ImGui::BeginDragDropTarget())
+									{
+										if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_HIERARCHY_ITEM"))
+										{
+											Entity* data = (Entity*)payload->Data;
+											ScriptFieldInstance& fieldInstance = entityFields[name];
+											fieldInstance.Field = field;
+											fieldInstance.SetValue(data);
+										}
+										ImGui::EndDragDropTarget();
+									}
+
+								}
 							}
 						}
 					}
 				}
 		});
 
-		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](auto& component)
+		DrawComponent<SpriteRendererComponent>("SpriteRenderer", entity, [](auto& component)
 		{
 			ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
 		
@@ -447,14 +643,14 @@ namespace Cataclysm
 			ImGui::DragFloat("Tiling Factor", &component.TilingFactor, 0.1f, 0.0f, 100.0f);
 		});
 
-		DrawComponent<CircleRendererComponent>("Circle Renderer", entity, [](auto& component)
+		DrawComponent<CircleRendererComponent>("CircleRenderer", entity, [](auto& component)
 		{
 			ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
 			ImGui::DragFloat("Thickness", &component.Thickness, 0.025f, 0.0f, 1.0f);
 			ImGui::DragFloat("Fade", &component.Fade, 0.00025f, 0.0f, 1.0f);
 		});
 
-		DrawComponent<Rigidbody2DComponent>("Rigidbody 2D", entity, [](auto& component)
+		DrawComponent<Rigidbody2DComponent>("Rigidbody2D", entity, [](auto& component)
 		{
 			const char* bodyTypeStrings[] = { "Static", "Dynamic", "Kinematic" };
 			const char* currentBodyTypeString = bodyTypeStrings[(int)component.Type];
@@ -479,7 +675,7 @@ namespace Cataclysm
 			ImGui::Checkbox("Fixed Rotation", &component.FixedRotation);
 		});
 
-		DrawComponent<BoxCollider2DComponent>("Box Collider 2D", entity, [](auto& component)
+		DrawComponent<BoxCollider2DComponent>("BoxCollider2D", entity, [](auto& component)
 		{
 			ImGui::DragFloat2("Offset", glm::value_ptr(component.Offset));
 			ImGui::DragFloat2("Size", glm::value_ptr(component.Size));
@@ -489,7 +685,7 @@ namespace Cataclysm
 			ImGui::DragFloat("Restitution Threshold", &component.RestitutionThreshold, 0.01f, 0.0f);
 		});
 
-		DrawComponent<CircleCollider2DComponent>("Circle Collider 2D", entity, [](auto& component)
+		DrawComponent<CircleCollider2DComponent>("CircleCollider2D", entity, [](auto& component)
 		{
 			ImGui::DragFloat2("Offset", glm::value_ptr(component.Offset));
 			ImGui::DragFloat("Radius", &component.Radius);
@@ -501,10 +697,10 @@ namespace Cataclysm
 
 		DrawComponent<TextComponent>("Text", entity, [](auto& component)
 		{
-			ImGui::InputTextMultiline("Text String", &component.TextString);
+			ImGui::InputTextMultiline("Text", &component.TextString);
 			ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
 			ImGui::DragFloat("Kerning", &component.Kerning, 0.025f);
-			ImGui::DragFloat("Line Spacing", &component.LineSpacing, 0.025f);
+			ImGui::DragFloat("Leading", &component.LineSpacing, 0.025f);
 		});
 	}
 }

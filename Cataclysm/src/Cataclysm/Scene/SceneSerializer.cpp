@@ -2,8 +2,8 @@
 #include "SceneSerializer.h"
 
 // cataclysm
-#include "Cataclysm/Scene/Entity.h"
-#include "Cataclysm/Scene/Components.h"
+#include "Cataclysm/ECS/Entity.h"
+#include "Cataclysm/ECS/Components.h"
 #include "Cataclysm/Scripting/ScriptEngine.h"
 #include "Cataclysm/Core/UUID.h"
 #include "Cataclysm/Project/Project.h"
@@ -279,9 +279,9 @@ namespace Cataclysm
 		}
 
 		// SCRIPT COMPONENT
-		if (entity.HasComponent<ScriptComponent>())
+		if (entity.HasComponent<MonoScriptComponent>())
 		{
-			auto& scriptComponent = entity.GetComponent<ScriptComponent>();
+			auto& scriptComponent = entity.GetComponent<MonoScriptComponent>();
 
 			out << YAML::Key << "ScriptComponent";
 			out << YAML::BeginMap;
@@ -344,7 +344,13 @@ namespace Cataclysm
 			out << YAML::Key << "Color" << YAML::Value << spriteRendererComponent.Color;
 
 			if (spriteRendererComponent.Texture)
-				out << YAML::Key << "TexturePath" << YAML::Value << spriteRendererComponent.Texture->GetPath();
+			{
+				std::string sub = "Textures\\";
+				std::string path = spriteRendererComponent.Texture->GetPath();
+				size_t position = path.find(sub);
+				
+				out << YAML::Key << "TexturePath" << YAML::Value << path.substr(position);
+			}
 
 			out << YAML::Key << "TilingFactor" << YAML::Value << spriteRendererComponent.TilingFactor;
 
@@ -428,7 +434,7 @@ namespace Cataclysm
 			return false;
 
 		std::string sceneName = data["Scene"].as<std::string>();
-		CC_CORE_TRACE("Deserializing scene '{0'", sceneName);
+		// CC_CORE_TRACE("[SceneSerilaizer::Deserialize] Deserializing scene '{0}'", sceneName);
 
 		auto entities = data["Entities"];
 		if (entities)
@@ -442,7 +448,7 @@ namespace Cataclysm
 				if (tagComponent)
 					name = tagComponent["Tag"].as<std::string>();
 
-				CC_CORE_TRACE("Deserialized entity with ID = {0}, name = {1}", uuid, name);
+				// CC_CORE_TRACE("[SceneSerializer::Deserialize] Deserialized entity '{1}' ({0})", uuid, name);
 
 				Entity deserializedEntity = m_Scene->CreateEntityWithUUID(uuid, name);
 
@@ -478,7 +484,7 @@ namespace Cataclysm
 				auto scriptComponent = entity["ScriptComponent"];
 				if (scriptComponent)
 				{
-					auto& sc = deserializedEntity.AddComponent<ScriptComponent>();
+					auto& sc = deserializedEntity.AddComponent<MonoScriptComponent>();
 					sc.ClassName = scriptComponent["ClassName"].as<std::string>();
 
 					auto scriptFields = scriptComponent["ScriptFields"];
@@ -498,8 +504,10 @@ namespace Cataclysm
 								ScriptFieldInstance& fieldInstance = entityFields[name];
 
 								CC_CORE_ASSERT(fields.find(name) != fields.end(), "Field not found!");
+
 								if (fields.find(name) == fields.end())
 									continue;
+								
 								fieldInstance.Field = fields.at(name);
 
 								switch (type)

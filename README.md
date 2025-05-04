@@ -33,7 +33,7 @@ scripting in C++.
 
 ## Getting Started
 
-Compiled Cataclysm binaries will be available soon for the first distribution build of Cataclysm. In the meantime, you can compile Cataclysm from source by following the instructions under <a href="#compilation">Compilation</a>.
+Compiled Cataclysm binaries will be available soon. In the meantime, you can compile Cataclysm from source by following the instructions under <a href="#compilation">Compilation</a>.
 
 Cataclysm is still early in development and will have bugs in distribution builds. Please help contribute to Cataclysm by reporting bugs and suggesting new features!
 
@@ -62,13 +62,13 @@ After cloning the latest version of Cataclysm, run Scripts/Win-GenProjects.bat t
 
 ## Changelog
 
-Changelog will become available once there are published distribution builds of Cataclysm binaries.
+v1.0.1 
 
 ## Documentation
 
-Since C# will be the primary scripting language for Cataclysm, documentation will only be provided for the Cataclysm Core Mono Library (CCML). Some XML documentation may be found throughout the C++ source code for help with C++ scripting, however it is highly recommended that you use C# for all Cataclysm projects. C++ scripting is only supported because the engine is written in C++ and the NativeScript component may be deprecated in a future release.
+Since C# will be the primary scripting language for Cataclysm, documentation is only be provided for the Cataclysm Core Mono Library (CCML). Some XML documentation may be found throughout the C++ source code for help with C++ scripting, however it is highly recommended that you use C# for all Cataclysm projects. C++ scripting is only supported because the engine is written in C++ and the NativeScript component may be deprecated in a future release.
 
-CCML documentation will be available soon at <a href="https://jackpsmith.com/cataclysm/docs">jackpsmith.com/cataclysm/docs</a>.
+CCML documentation is be available soon at <a href="https://jackpsmith.com/cataclysm/docs">jackpsmith.com/cataclysm/docs</a>.
 
 ## License
 

@@ -1,4 +1,6 @@
-﻿namespace Cataclysm
+﻿using System;
+
+namespace Cataclysm
 {
 	/// <summary>
 	/// Cataclysm Vector4f
@@ -33,6 +35,14 @@
 			W = w;
 		}
 
+		public Vec4(Vec2 xy, float z, float w)
+		{
+			X = xy.X;
+			Y = xy.Y;
+			Z = z;
+			W = w;
+		}
+
 		public Vec2 XY
 		{
 			get => new Vec2(X, Y);
@@ -54,14 +64,12 @@
 			}
 		}
 
-		public static Vec4 operator +(Vec4 a, Vec4 b)
-		{
-			return new Vec4(a.X + b.X, a.Y + b.Y, a.Z + b.Z, a.W + b.W);
-		}
+		public static Vec4 operator +(Vec4 a, Vec4 b) => new Vec4((a.X + b.X), (a.Y + b.Y), (a.Z + b.Z), (a.W + b.W));
+		public static Vec4 operator *(Vec4 vector, float scalar) => new Vec4(vector.X * scalar, vector.Y * scalar, vector.Z * scalar, vector.W * scalar);
 
-		public static Vec4 operator *(Vec4 vector, float scalar)
-		{
-			return new Vec4(vector.X * scalar, vector.Y * scalar, vector.Z * scalar, vector.W * scalar);
-		}
+		public float MagnitudeSquared() => ((X * X) + (Y * Y) + (Z * Z) + (W * W));
+		public float Magnitude() => (float)Math.Sqrt(MagnitudeSquared());
+
+		public override string ToString() => $"({X}, {Y}, {Z}, {W})";
 	}
 }

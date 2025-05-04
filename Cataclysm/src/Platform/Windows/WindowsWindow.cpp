@@ -1,7 +1,7 @@
 #include "ccpch.h"
 #include "WindowsWindow.h"
 
-#include "Cataclysm/Core/Input.h"
+#include "Cataclysm/Input/Input.h"
 
 #include "Cataclysm/Events/ApplicationEvent.h"
 #include "Cataclysm/Events/KeyEvent.h"
@@ -47,13 +47,13 @@ namespace Cataclysm
 		m_Data.Width = props.Width;
 		m_Data.Height = props.Height;
 
-		CC_CORE_INFO("Creating window {0} ({1}, {2})", props.Title, props.Width, props.Height);
+		// CC_CORE_INFO("[WindowsWindow::Init] Creating GLFW window {0} ({1}, {2})", props.Title, props.Width, props.Height);
 
 		if (s_GLFWWindowCount == 0)
 		{
 			CC_PROFILE_SCOPE("glfwInit");
 			int success = glfwInit();
-			CC_CORE_ASSERT(success, "Could not intialize GLFW!");
+			CC_CORE_ASSERT(success, "[WindowsWindow::Init] Could not intialize GLFW!");
 			glfwSetErrorCallback(GLFWErrorCallback);
 		}
 

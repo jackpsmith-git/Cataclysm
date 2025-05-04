@@ -1,6 +1,7 @@
 #include "ccpch.h"
 #include "Renderer.h"
-#include "Vesuvius.h"
+
+#include "Cataclysm/Renderer/Vesuvius/Vesuvius.h"
 
 #include "Platform/OpenGL/OpenGLShader.h"
 

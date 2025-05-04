@@ -1,10 +1,11 @@
 #pragma once
 
+#include "Cataclysm/Core/Core.h"
+
 #define GLM_ENABLE_EXPERIMENTAL
-#include "glm/gtx/string_cast.hpp"
+#include <glm/gtx/string_cast.hpp>
 
 #include <memory>
-#include "Core.h"
 
 #pragma warning(push, 0)
 #include <spdlog/spdlog.h>

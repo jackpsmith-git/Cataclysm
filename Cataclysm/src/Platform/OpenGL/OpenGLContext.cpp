@@ -21,12 +21,6 @@ namespace Cataclysm
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		CC_CORE_ASSERT(status, "Failed to initialize Glad!");
 
-		CC_CORE_INFO("OpenGL Info:");
-		CC_CORE_INFO("  Vendor: {0}", (void*)glGetString(GL_VENDOR));
-		CC_CORE_INFO("  Renderer: {0}", (void*)glGetString(GL_RENDERER));
-		CC_CORE_INFO("  Version: {0}", (void*)glGetString(GL_VERSION));
-
-
 #ifdef CC_ENABLE_ASSERTS
 		int versionMajor;
 		int versionMinor;

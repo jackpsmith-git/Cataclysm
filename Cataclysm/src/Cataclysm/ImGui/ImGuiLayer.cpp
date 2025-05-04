@@ -41,8 +41,13 @@ namespace Cataclysm
 		// io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 
 		float fontSize = 18.0f;// *2.0f;
+		io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Light.ttf", fontSize);
 		io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Bold.ttf", fontSize);
-		io.FontDefault = io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Regular.ttf", fontSize);
+		io.Fonts->AddFontFromFileTTF("assets/fonts/IBMPlexMono/IBMPlexMono-Light.ttf", fontSize);
+		io.Fonts->AddFontFromFileTTF("assets/fonts/IBMPlexMono/IBMPlexMono-Regular.ttf", fontSize);
+		io.Fonts->AddFontFromFileTTF("assets/fonts/IBMPlexMono/IBMPlexMono-SemiBold.ttf", fontSize);
+		io.Fonts->AddFontFromFileTTF("assets/fonts/IBMPlexMono/IBMPlexMono-Bold.ttf", fontSize);
+		io.FontDefault = io.Fonts->AddFontFromFileTTF("assets/fonts/IBMPlexMono/IBMPlexMono-Regular.ttf", fontSize);
 		
 		ImGui::StyleColorsDark();
 
@@ -114,7 +119,7 @@ namespace Cataclysm
 	void ImGuiLayer::SetDarkThemeColors()
 	{
 		auto& colors = ImGui::GetStyle().Colors;
-		colors[ImGuiCol_WindowBg] = ImVec4{ 0.1f, 0.105f, 0.11f, 1.0f };
+		colors[ImGuiCol_WindowBg] = ImVec4{ 0.25f, 0.255f, 0.26f, 1.0f };
 
 		// Headers
 		colors[ImGuiCol_Header] = ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };

@@ -2,11 +2,13 @@
 #include "Scene.h"
 
 // Cataclysm
-#include "Cataclysm/Scene/Components.h"
-#include "Cataclysm/Scene/Entity.h"
-#include "Cataclysm/Scene/ScriptableEntity.h"
+#include "Cataclysm/Core/Log.h"
+#include "Cataclysm/ECS/Components.h"
+#include "Cataclysm/ECS/Entity.h"
+#include "Cataclysm/ECS/ScriptableEntity.h"
+
 #include "Cataclysm/Scripting/ScriptEngine.h"
-#include "Cataclysm/Renderer/Vesuvius.h"
+#include "Cataclysm/Renderer/Vesuvius/Vesuvius.h"
 #include "Cataclysm/Physics/Physics2D.h"
 
 // Box2D
@@ -23,7 +25,7 @@ namespace Cataclysm
 {
 	Scene::Scene()
 	{
-		
+
 	}
 
 	Scene::~Scene()
@@ -130,7 +132,7 @@ namespace Cataclysm
 			ScriptEngine::OnRuntimeStart(this);
 			// Instantiate all script entities
 
-			auto view = m_Registry.view<ScriptComponent>();
+			auto view = m_Registry.view<MonoScriptComponent>();
 			for (auto e : view)
 			{
 				Entity entity = { e, this };
@@ -164,25 +166,30 @@ namespace Cataclysm
 			// Update Scripts
 			{
 				// C# Entity OnUpdate
-				auto view = m_Registry.view<ScriptComponent>();
+				auto view = m_Registry.view<MonoScriptComponent>();
 				for (auto e : view)
 				{
 					Entity entity = { e, this };
-					ScriptEngine::OnUpdateEntity(entity, ts);
+					auto& id = entity.GetComponent<IDComponent>();
+					if (id.Enabled)
+					{
+						ScriptEngine::OnUpdateEntity(entity, ts);
+
+					}
 				}
 
 				m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
-				{
-					// TODO: Move to Scene::OnScenePlay
-					if (!nsc.Instance)
 					{
-						nsc.Instance = nsc.InstantiateScript();
-						nsc.Instance->m_Entity = Entity{ entity, this };
-						nsc.Instance->OnCreate();
-					}
+						// TODO: Move to Scene::OnScenePlay
+						if (!nsc.Instance)
+						{
+							nsc.Instance = nsc.InstantiateScript();
+							nsc.Instance->m_Entity = Entity{ entity, this };
+							nsc.Instance->OnCreate();
+						}
 
-					nsc.Instance->OnUpdate(ts);
-				});
+						nsc.Instance->OnUpdate(ts);
+					});
 			}
 
 			// Physics
@@ -196,15 +203,31 @@ namespace Cataclysm
 				for (auto e : view)
 				{
 					Entity entity = { e, this };
+					auto& id = entity.GetComponent<IDComponent>();
 					auto& transform = entity.GetComponent<TransformComponent>();
 					auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
 
 					b2Body* body = (b2Body*)rb2d.RuntimeBody;
 
 					const auto& position = body->GetPosition();
-					transform.Translation.x = position.x;
-					transform.Translation.y = position.y;
-					transform.Rotation.z = body->GetAngle();
+
+					if (id.Enabled)
+					{
+						if (!entity.HasComponent<TransformComponent>())
+						{
+							std::string error = "[Scene::OnUpdateRuntime] Entity '" + entity.GetName() + "' does not contain component <TransformComponent>";
+							RuntimeErrorHit(error);
+						}
+
+						transform.Translation.x = position.x;
+						transform.Translation.y = position.y;
+						transform.Rotation.z = body->GetAngle();
+					}
+					else
+					{
+						body->SetLinearVelocity(b2Vec2_zero);
+						body->SetAngularVelocity(0.0f);
+					}
 				}
 			}
 		}
@@ -214,9 +237,11 @@ namespace Cataclysm
 		glm::mat4 cameraTransform;
 		{
 			auto view = m_Registry.view<TransformComponent, CameraComponent>();
-			for (auto entity : view)
+			for (auto e : view)
 			{
-				auto [transform, camera] = view.get<TransformComponent, CameraComponent>(entity);
+				Entity entity = { e, this };
+				auto& tag = entity.GetComponent<TagComponent>();
+				auto [transform, camera] = view.get<TransformComponent, CameraComponent>(e);
 
 				if (camera.Primary)
 				{
@@ -234,30 +259,45 @@ namespace Cataclysm
 			// Draw Sprites
 			{
 				auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
-				for (auto entity : group)
+				for (auto e : group)
 				{
-					auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-					Vesuvius::DrawSprite(transform.GetTransform(), sprite, (int)entity);
+					Entity entity = { e, this };
+					auto& id = entity.GetComponent<IDComponent>();
+					if (id.Enabled)
+					{
+						auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(e);
+						Vesuvius::DrawSprite(transform.GetTransform(), sprite, (int)e);
+					}
 				}
 			}
 
 			// Draw Circles
 			{
 				auto view = m_Registry.view<TransformComponent, CircleRendererComponent>();
-				for (auto entity : view)
+				for (auto e : view)
 				{
-					auto [transform, circle] = view.get<TransformComponent, CircleRendererComponent>(entity);
-					Vesuvius::DrawCircle(transform.GetTransform(), circle.Color, circle.Thickness, circle.Fade, (int)entity);
+					Entity entity = { e, this };
+					auto& id = entity.GetComponent<IDComponent>();
+					if (id.Enabled)
+					{
+						auto [transform, circle] = view.get<TransformComponent, CircleRendererComponent>(e);
+						Vesuvius::DrawCircle(transform.GetTransform(), circle.Color, circle.Thickness, circle.Fade, (int)e);
+					}
 				}
 			}
 
 			// Draw Text
 			{
 				auto view = m_Registry.view<TransformComponent, TextComponent>();
-				for (auto entity : view)
+				for (auto e : view)
 				{
-					auto [transform, text] = view.get<TransformComponent, TextComponent>(entity);
-					Vesuvius::DrawString(text.TextString, transform.GetTransform(), text, (int)entity);
+					Entity entity = { e, this };
+					auto& id = entity.GetComponent<IDComponent>();
+					if (id.Enabled)
+					{
+						auto [transform, text] = view.get<TransformComponent, TextComponent>(e);
+						Vesuvius::DrawString(text.TextString, transform.GetTransform(), text, (int)e);
+					}
 				}
 			}
 
@@ -276,20 +316,24 @@ namespace Cataclysm
 				m_PhysicsWorld->Step(ts, velocityIterations, positionIterations);
 
 				// Retrieve transform from Box2D
-				auto view = m_Registry.view<Rigidbody2DComponent>();
+				auto view = m_Registry.view<TagComponent, Rigidbody2DComponent>();
 				for (auto e : view)
 				{
 					Entity entity = { e, this };
-					auto& transform = entity.GetComponent<TransformComponent>();
-					auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+					auto& id = entity.GetComponent<IDComponent>();
+					if (id.Enabled)
+					{
+						auto& transform = entity.GetComponent<TransformComponent>();
+						auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
 
-					b2Body* body = (b2Body*)rb2d.RuntimeBody;
-					const auto& position = body->GetPosition();
-					transform.Translation.x = position.x;
-					transform.Translation.y = position.y;
-					transform.Rotation.z = body->GetAngle();
+						b2Body* body = (b2Body*)rb2d.RuntimeBody;
+						const auto& position = body->GetPosition();
+						transform.Translation.x = position.x;
+						transform.Translation.y = position.y;
+						transform.Rotation.z = body->GetAngle();
+					}
 				}
-			}		
+			}
 		}
 
 		// Render
@@ -302,30 +346,45 @@ namespace Cataclysm
 		// Draw sprites
 		{
 			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
-			for (auto entity : group)
+			for (auto e : group)
 			{
-				auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-				Vesuvius::DrawSprite(transform.GetTransform(), sprite, (int)entity);
+				Entity entity = { e, this };
+				auto& id = entity.GetComponent<IDComponent>();
+				if (id.Enabled)
+				{
+					auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(e);
+					Vesuvius::DrawSprite(transform.GetTransform(), sprite, (int)e);
+				}
 			}
 		}
 
 		// Draw circles
 		{
 			auto view = m_Registry.view<TransformComponent, CircleRendererComponent>();
-			for (auto entity : view)
+			for (auto e : view)
 			{
-				auto [transform, circle] = view.get<TransformComponent, CircleRendererComponent>(entity);
-				Vesuvius::DrawCircle(transform.GetTransform(), circle.Color, circle.Thickness, circle.Fade, (int)entity);
+				Entity entity = { e, this };
+				auto& id = entity.GetComponent<IDComponent>();
+				if (id.Enabled)
+				{
+					auto [transform, circle] = view.get<TransformComponent, CircleRendererComponent>(e);
+					Vesuvius::DrawCircle(transform.GetTransform(), circle.Color, circle.Thickness, circle.Fade, (int)e);
+				}
 			}
 		}
 
 		// Draw text
 		{
 			auto view = m_Registry.view<TransformComponent, TextComponent>();
-			for (auto entity : view)
+			for (auto e : view)
 			{
-				auto [transform, text] = view.get<TransformComponent, TextComponent>(entity);
-				Vesuvius::DrawString(text.TextString, transform.GetTransform(), text, (int)entity);
+				Entity entity = { e, this };
+				auto& id = entity.GetComponent<IDComponent>();
+				if (id.Enabled)
+				{
+					auto [transform, text] = view.get<TransformComponent, TextComponent>(e);
+					Vesuvius::DrawString(text.TextString, transform.GetTransform(), text, (int)e);
+				}
 			}
 		}
 
@@ -461,6 +520,13 @@ namespace Cataclysm
 		return newEntity;
 	}
 
+	void Scene::RuntimeErrorHit(std::string& error)
+	{
+		CC_CORE_ERROR(error);
+		if (IsRunning())
+			m_IsPaused = true;
+	}
+
 	template<typename T>
 	void Scene::OnComponentAdded(Entity entity, T& component)
 	{
@@ -504,7 +570,7 @@ namespace Cataclysm
 	}
 
 	template<>
-	void Scene::OnComponentAdded<ScriptComponent>(Entity entity, ScriptComponent& component)
+	void Scene::OnComponentAdded<MonoScriptComponent>(Entity entity, MonoScriptComponent& component)
 	{
 	}
 

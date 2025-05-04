@@ -30,6 +30,8 @@ namespace Cataclysm
 		void OnSimulationStart();
 		void OnSimulationStop();
 
+		void RuntimeErrorHit(std::string& error);
+
 		void OnUpdateRuntime(Timestep ts);
 		void OnUpdateSimulation(Timestep ts, EditorCamera& camera);
 		void OnUpdateEditor(Timestep ts, EditorCamera& camera);

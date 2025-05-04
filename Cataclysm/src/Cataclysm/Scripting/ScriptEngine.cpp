@@ -15,7 +15,7 @@
 #include "Cataclysm/Core/Application.h"
 #include "Cataclysm/Core/Timer.h"
 #include "Cataclysm/Core/Buffer.h"
-#include "Cataclysm/Core/FileSystem.h"
+#include "Cataclysm/Core/File.h"
 #include "Cataclysm/Project/Project.h"
 
 namespace Cataclysm
@@ -45,7 +45,7 @@ namespace Cataclysm
 	{
 		static MonoAssembly* LoadMonoAssembly(const std::filesystem::path& assemblyPath, bool loadPDB = false)
 		{
-			ScopedBuffer fileData = FileSystem::ReadFileBinary(assemblyPath);
+			ScopedBuffer fileData = File::Read(assemblyPath);
 
 			// NOTE: We can't use this image for anything other than loading the assembly because this image doesn't have a reference to the assembly
 			MonoImageOpenStatus status;
@@ -65,7 +65,7 @@ namespace Cataclysm
 
 				if (std::filesystem::exists(pdbPath))
 				{
-					ScopedBuffer pdbFileData = FileSystem::ReadFileBinary(pdbPath);
+					ScopedBuffer pdbFileData = File::Read(pdbPath);
 					mono_debug_open_image_from_memory(image, pdbFileData.As<const mono_byte>(), pdbFileData.Size());
 
 					// CC_CORE_INFO("Loaded PDB {}", pdbPath);
@@ -104,7 +104,7 @@ namespace Cataclysm
 			auto it = s_ScriptFieldTypeMap.find(typeName);
 			if (it == s_ScriptFieldTypeMap.end())
 			{
-				CC_CORE_ERROR("Unknown type: {}", typeName);
+				CC_CORE_WARN("[ScriptEngine::MonoTypeToScriptFieldType] Unknown type: {}", typeName);
 				return ScriptFieldType::None;
 			}
 
@@ -176,7 +176,7 @@ namespace Cataclysm
 		bool status = LoadAssembly("Resources/Scripts/CCML.dll");
 		if (!status)
 		{
-			CC_CORE_ERROR("[ScriptEngine] Could not load CCML assembly.");
+			CC_CORE_ERROR("[ScriptEngine::Init] Could not load CCML assembly.");
 			return;
 		}
 
@@ -184,7 +184,7 @@ namespace Cataclysm
 		status = LoadAppAssembly(scriptModulePath);
 		if (!status)
 		{
-			CC_CORE_ERROR("[ScriptEngine] Could not load app assembly.");
+			CC_CORE_ERROR("[ScriptEngine::Init] Could not load app assembly.");
 			return;
 		}
 
@@ -211,13 +211,12 @@ namespace Cataclysm
 				"--debugger-agent=transport=dt_socket,address=127.0.0.1:2550,server=y,suspend=n,loglevel=3,logfile=MonoDebugger.log",
 				"--soft-breakpoints"
 			};
-
 			mono_jit_parse_options(2, (char**)argv);
 			mono_debug_init(MONO_DEBUG_FORMAT_MONO);
 		}
 
 		MonoDomain* rootDomain = mono_jit_init("CataclysmJITRuntime");
-		CC_CORE_ASSERT(rootDomain, "Failed to initialize CataclysmJITRuntime!");
+		CC_CORE_ASSERT(rootDomain, "[ScriptEngine::InitMono] Failed to initialize CataclysmJITRuntime!");
 
 		// Store the root domain pointer
 		s_Data->RootDomain = rootDomain;
@@ -231,8 +230,10 @@ namespace Cataclysm
 	void ScriptEngine::ShutdownMono()
 	{
 		mono_domain_set(mono_get_root_domain(), false);
+
 		mono_domain_unload(s_Data->AppDomain);
 		s_Data->AppDomain = nullptr;
+		
 		mono_jit_cleanup(s_Data->RootDomain);
 		s_Data->RootDomain = nullptr;
 	}
@@ -305,7 +306,6 @@ namespace Cataclysm
 			// to iterate over all of the elements. When no more values are available, the return value is NULL.
 
 			int fieldCount = mono_class_num_fields(monoClass);
-			CC_CORE_WARN("{} has {} fields:", className, fieldCount);
 			void* iterator = nullptr;
 			while (MonoClassField* field = mono_class_get_fields(monoClass, &iterator))
 			{
@@ -315,7 +315,6 @@ namespace Cataclysm
 				{
 					MonoType* type = mono_field_get_type(field);
 					ScriptFieldType fieldType = Utils::MonoTypeToScriptFieldType(type);
-					CC_CORE_WARN("  {} ({})", fieldName, Utils::ScriptFieldTypeToString(fieldType));
 
 					scriptClass->m_Fields[fieldName] = { fieldType, fieldName, field };
 				}
@@ -356,7 +355,7 @@ namespace Cataclysm
 
 	void ScriptEngine::OnCreateEntity(Entity entity)
 	{
-		const auto& sc = entity.GetComponent<ScriptComponent>();
+		const auto& sc = entity.GetComponent<MonoScriptComponent>();
 		if (ScriptEngine::EntityClassExists(sc.ClassName))
 		{
 			UUID entityID = entity.GetUUID();
@@ -387,7 +386,8 @@ namespace Cataclysm
 		}
 		else
 		{
-			// CC_CORE_ERROR("Could not find ScriptInstance for entity {}", entityUUID);
+			Scene* scene = GetSceneContext();
+			scene->RuntimeErrorHit("[ScriptEngine::OnUpdateEntity] Could not find ScriptInstance for entity '" + entity.GetName() + "'");
 		}
 	}
 
@@ -443,7 +443,7 @@ namespace Cataclysm
 
 	ScriptFieldMap& ScriptEngine::GetScriptFieldMap(Entity entity)
 	{
-		CC_CORE_ASSERT(entity, "Entity does not exist!");
+		CC_CORE_ASSERT(entity, "[ScriptEngine::GetScriptFieldMap] Entity does not exist!");
 
 		UUID entityID = entity.GetUUID();
 		return s_Data->EntityScriptFields[entityID];

@@ -1,5 +1,22 @@
 ﻿namespace Cataclysm
 {
+	public enum MouseCode
+	{
+		Button0 = 0,
+		Button1 = 1,
+		Button2 = 2,
+		Button3 = 3,
+		Button4 = 4,
+		Button5 = 5,
+		Button6 = 6,
+		Button7 = 7,
+
+		ButtonLast = 8,
+		ButtonLeft = 9,
+		ButtonRight = 10,
+		ButtonMiddle = 11,
+	}
+
 	/// <summary>
 	/// Cataclysm Key Code
 	/// </summary>

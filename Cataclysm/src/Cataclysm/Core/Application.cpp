@@ -1,20 +1,12 @@
 #include "ccpch.h"
+#include "Application.h"
 
-// core
-#include "Cataclysm/Core/Application.h"
 #include "Cataclysm/Core/Log.h"
-#include "Cataclysm/Core/Input.h"
-
-// renderer
+#include "Cataclysm/Input/Input.h"
 #include "Cataclysm/Renderer/Renderer.h"
-
-// utils
 #include "Cataclysm/Utils/PlatformUtils.h"
-
-// scripting
 #include "Cataclysm/Scripting/ScriptEngine.h"
 
-// std
 #include <filesystem>
 
 namespace Cataclysm
@@ -26,7 +18,7 @@ namespace Cataclysm
 	{
 		CC_PROFILE_FUNCTION();
 
-		CC_CORE_ASSERT(!s_Instance, "Application already exists!");
+		CC_CORE_ASSERT(!s_Instance, "[Application::Application] Application already exists!");
 		s_Instance = this;
 
 		// Set working directory here
@@ -115,7 +107,7 @@ namespace Cataclysm
 					CC_PROFILE_SCOPE("LayerStack OnImGuiRender");
 
 					for (Layer* layer : m_LayerStack)
-						layer->OnImGuiRender();
+						layer->OnImGuiRender(timestep);
 				}
 				m_ImGuiLayer->End();
 			}
