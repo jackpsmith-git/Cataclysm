@@ -65,5 +65,13 @@
 			get => InternalCalls.CircleCollider2DComponent_GetRestitutionThreshold(Entity.ID);
 			set => InternalCalls.CircleCollider2DComponent_SetRestitutionThreshold(Entity.ID, value);
 		}
+
+		public bool IsTrigger
+		{
+			get => InternalCalls.CircleCollider2DComponent_GetIsTrigger(Entity.ID);
+			set => InternalCalls.CircleCollider2DComponent_SetIsTrigger(Entity.ID, value);
+		}
+
+		public void Reset() => InternalCalls.CircleCollider2DComponent_Reset(Entity.ID);
 	}
 }

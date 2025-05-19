@@ -25,7 +25,7 @@ namespace Cataclysm
 		Float, Double,
 		Bool, Char, Byte, Short, Int, Long,
 		UByte, UShort, UInt, ULong,
-		Vector2, Vector3, Vector4,
+		Vec2, Vec3, Vec4,
 		Entity, String
 	};
 
@@ -61,6 +61,7 @@ namespace Cataclysm
 		}
 	private:
 		uint8_t m_Buffer[16];
+		// std::array<uint8_t, 16> m_VecBuffer;
 
 		friend class ScriptEngine;
 		friend class ScriptInstance;
@@ -79,6 +80,19 @@ namespace Cataclysm
 		MonoObject* InvokeMethod(MonoObject* instance, MonoMethod* method, void** params = nullptr);
 
 		const std::map<std::string, ScriptField>& GetFields() const { return m_Fields; }
+
+		const ScriptField& GetField(const std::string& name) const
+		{
+			auto it = m_Fields.find(name);
+			CC_CORE_ASSERT(it != m_Fields.end(), "Field not found!");
+			return it->second;
+		}
+
+		bool HasField(const std::string& name) const
+		{
+			return m_Fields.find(name) != m_Fields.end();
+		}
+
 	private:
 		std::string m_ClassNamespace;
 		std::string m_ClassName;
@@ -155,6 +169,8 @@ namespace Cataclysm
 		static bool EntityClassExists(const std::string& fullClassName);
 		static void OnCreateEntity(Entity entity);
 		static void OnUpdateEntity(Entity entity, Timestep ts);
+		static void OnCollisionEnter2D(Entity entity, Entity other);
+		static void OnCollisionExit2D(Entity entity, Entity other);
 
 		static Scene* GetSceneContext();
 		static Ref<ScriptInstance> GetEntityScriptInstance(UUID entityID);
@@ -168,6 +184,10 @@ namespace Cataclysm
 		static MonoObject* GetManagedInstance(UUID uuid);
 
 		static MonoString* CreateString(const char* string);
+
+		static MonoObject* ScriptEngine::CreateEntityInstance(Entity entity);
+
+		static void OnScriptComponentDestroyed(Entity entity);
 	private:
 		static void InitMono();
 		static void ShutdownMono();
@@ -197,9 +217,9 @@ namespace Cataclysm
 				case ScriptFieldType::UShort:	return "UShort";
 				case ScriptFieldType::UInt:		return "UInt";
 				case ScriptFieldType::ULong:	return "ULong";
-				case ScriptFieldType::Vector2:	return "Vector2";
-				case ScriptFieldType::Vector3:	return "Vector3";
-				case ScriptFieldType::Vector4:	return "Vector4";
+				case ScriptFieldType::Vec2:		return "Vec2";
+				case ScriptFieldType::Vec3:		return "Vec3";
+				case ScriptFieldType::Vec4:		return "Vec4";
 				case ScriptFieldType::Entity:	return "Entity";
 				case ScriptFieldType::String:	return "String";
 			}
@@ -222,9 +242,9 @@ namespace Cataclysm
 			if (fieldType == "UShort")	return ScriptFieldType::UShort;
 			if (fieldType == "UInt")	return ScriptFieldType::UInt;
 			if (fieldType == "ULong")	return ScriptFieldType::ULong;
-			if (fieldType == "Vector2")	return ScriptFieldType::Vector2;
-			if (fieldType == "Vector3")	return ScriptFieldType::Vector3;
-			if (fieldType == "Vector4")	return ScriptFieldType::Vector4;
+			if (fieldType == "Vec2")	return ScriptFieldType::Vec2;
+			if (fieldType == "Vec3")	return ScriptFieldType::Vec3;
+			if (fieldType == "Vec4")	return ScriptFieldType::Vec4;
 			if (fieldType == "Entity")	return ScriptFieldType::Entity;
 			if (fieldType == "String")  return ScriptFieldType::String;
 

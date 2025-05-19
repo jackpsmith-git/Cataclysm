@@ -62,13 +62,29 @@ After cloning the latest version of Cataclysm, run Scripts/Win-GenProjects.bat t
 
 ## Changelog
 
-v1.0.1 
+v1.0.1
+<ul>
+    <li>Parent/Child</li>
+    <li>Local vs Global Transforms</li>
+    <li>Profiler</li>
+    <li>Per-Entity Font Binding</li>
+    <li>Trigger Colliders</li>
+    <li>Additional Physics Functions</li>
+    <li>Additional Vector Functions</li>
+    <li>Additional Entity Functions</li>
+    <li>Drag and Drop Scripts and Fonts</li>
+    <li>Improved UI</li>
+    <li>Documentation</li>
+    <li>QOL Features</li>
+    <li>Code Refactor</li>
+    <li>Bug Fixes</li>
+</ul>
 
 ## Documentation
 
 Since C# will be the primary scripting language for Cataclysm, documentation is only be provided for the Cataclysm Core Mono Library (CCML). Some XML documentation may be found throughout the C++ source code for help with C++ scripting, however it is highly recommended that you use C# for all Cataclysm projects. C++ scripting is only supported because the engine is written in C++ and the NativeScript component may be deprecated in a future release.
 
-CCML documentation is be available soon at <a href="https://jackpsmith.com/cataclysm/docs">jackpsmith.com/cataclysm/docs</a>.
+CCML documentation is available at <a href="https://jackpsmith.com/cataclysm/docs">jackpsmith.com/cataclysm/docs</a>. Additionally, the documentation is stored offline in-engine.
 
 ## License
 

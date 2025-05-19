@@ -19,6 +19,8 @@
 // imguizmo
 #include "ImGuizmo.h"
 
+#include <cstdlib>
+
 
 namespace Cataclysm
 {
@@ -36,20 +38,45 @@ namespace Cataclysm
 
 		// m_CheckerboardTexture = Cataclysm::Texture2D::Create("assets/textures/Checkerboard.png");
 		// m_JackPSmithLogoTexture = Cataclysm::Texture2D::Create("assets/textures/JackPSmithLogo.png");
-		m_IconPlay = Cataclysm::Texture2D::Create("Resources/Icons/PlayButton.png");
-		m_IconPause = Cataclysm::Texture2D::Create("Resources/Icons/PauseButton.png");
-		m_IconStep = Cataclysm::Texture2D::Create("Resources/Icons/StepButton.png");
-		m_IconSimulate = Cataclysm::Texture2D::Create("Resources/Icons/SimulateButton.png");
-		m_IconStop = Cataclysm::Texture2D::Create("Resources/Icons/StopButton.png");
+		m_IconPlay = Texture2D::Create("Resources/Icons/PlayButton.png");
+		m_IconPause = Texture2D::Create("Resources/Icons/PauseButton.png");
+		m_IconStep = Texture2D::Create("Resources/Icons/StepButton.png");
+		m_IconSimulate = Texture2D::Create("Resources/Icons/SimulateButton.png");
+		m_IconStop = Texture2D::Create("Resources/Icons/StopButton.png");
+		m_IconShowPhysicsColliders = Texture2D::Create("Resources/Icons/ShowPhysicsColliders.png");
+		m_IconTranslate = Texture2D::Create("Resources/Icons/TranslateIcon.png");
+		m_IconRotate = Texture2D::Create("Resources/Icons/RotateIcon.png");
+		m_IconScale = Texture2D::Create("Resources/Icons/ScaleIcon.png");
+		m_IconShowPhysicsCollidersFaded = Texture2D::Create("Resources/Icons/ShowPhysicsCollidersFaded.png");
+		m_IconTranslateFaded = Texture2D::Create("Resources/Icons/TranslateIconFaded.png");
+		m_IconRotateFaded = Texture2D::Create("Resources/Icons/RotateIconFaded.png");
+		m_IconScaleFaded = Texture2D::Create("Resources/Icons/ScaleIconFaded.png");
+		m_IconEmpty = Texture2D::Create("Resources/Icons/EmptyIcon.png");
+		m_IconEmptyFaded = Texture2D::Create("Resources/Icons/EmptyIconFaded.png");
+		m_IconClear = Texture2D::Create("Resources/Icons/ClearIcon.png");
+		m_IconError = Texture2D::Create("Resources/Icons/ErrorIcon.png");
+		m_IconErrorFaded = Texture2D::Create("Resources/Icons/ErrorIconFaded.png");
+		m_IconWarning = Texture2D::Create("Resources/Icons/WarningIcon.png");
+		m_IconWarningFaded = Texture2D::Create("Resources/Icons/WarningIconFaded.png");
+		m_IconTrace = Texture2D::Create("Resources/Icons/TraceIcon.png");
+		m_IconTraceFaded = Texture2D::Create("Resources/Icons/TraceIconFaded.png");
+		m_IconInfo = Texture2D::Create("Resources/Icons/InfoIcon.png");
+		m_IconInfoFaded = Texture2D::Create("Resources/Icons/InfoIconFaded.png");
+		m_CataclysmLogo = Texture2D::Create("Resources/Icons/CataclysmLogo.png");
+		m_IconDocumentation = Texture2D::Create("Resources/Icons/DocumentationIcon.png");
+		m_IconResetCamera = Texture2D::Create("Resources/Icons/ResetCameraIcon.png");
 
-		Cataclysm::FramebufferSpecification fbSpec;
-		fbSpec.Attachments = { Cataclysm::FramebufferTextureFormat::RGBA8, Cataclysm::FramebufferTextureFormat::RED_INTEGER, Cataclysm::FramebufferTextureFormat::Depth };
+		FramebufferSpecification fbSpec;
+		fbSpec.Attachments = { FramebufferTextureFormat::RGBA8, Cataclysm::FramebufferTextureFormat::RED_INTEGER, Cataclysm::FramebufferTextureFormat::Depth };
 		fbSpec.Width = 1280;
 		fbSpec.Height = 720;
 		m_Framebuffer = Cataclysm::Framebuffer::Create(fbSpec);
 
 		m_EditorScene = Cataclysm::CreateRef<Cataclysm::Scene>();
 		m_ActiveScene = m_EditorScene;
+
+		m_GamePanel = CreateScope<GamePanel>();
+		m_GamePanel->Init();
 
 		auto commandLineArgs = Cataclysm::Application::Get().GetSpecification().CommandLineArgs;
 
@@ -63,6 +90,9 @@ namespace Cataclysm
 			if (!OpenProject())
 				Application::Get().Close();
 		}
+
+		m_ProfilerPanel = CreateScope<ProfilerPanel>();
+		m_ProfilerPanel->Init();
 
 		m_EditorCamera = Cataclysm::EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
 		Cataclysm::Vesuvius::SetLineWidth(4.0f);
@@ -115,7 +145,7 @@ namespace Cataclysm
 			case SceneState::Simulate:
 			{
 				m_EditorCamera.OnUpdate(ts);
-				m_ActiveScene->OnUpdateSimulation(ts, m_EditorCamera);
+				m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
 				break;
 			}
 			case SceneState::Play:
@@ -166,33 +196,59 @@ namespace Cataclysm
 				for (auto entity : view)
 				{
 					auto [tc, bc2d] = view.get<TransformComponent, BoxCollider2DComponent>(entity);
+					glm::mat4 transform = tc.GlobalTransform;
 
-					glm::vec3 translation = tc.Translation + glm::vec3(bc2d.Offset, 0.001f);
-					glm::vec3 scale = tc.Scale * glm::vec3(bc2d.Size * 2.0f, 1.0f);
+					glm::vec3 translation, rotation, scale;
+					Cataclysm::Math::DecomposeTransform(transform, translation, rotation, scale);
 
-					glm::mat4 transform = glm::translate(glm::mat4(1.0f), tc.Translation)
-						* glm::rotate(glm::mat4(1.0f), tc.Rotation.z, glm::vec3(0.0f, 0.0f, 1.0f))
-						* glm::translate(glm::mat4(1.0f), glm::vec3(bc2d.Offset, 0.001f))
-						* glm::scale(glm::mat4(1.0f), scale);
+					float cosAngle = cos(rotation.z);
+					float sinAngle = sin(rotation.z);
 
-					Vesuvius::DrawRect(transform, glm::vec4(0, 1, 0, 1));
+					// Rotate offset vector in 2D plane (X,Y)
+					glm::vec2 rotatedOffset = {
+						bc2d.Offset.x * cosAngle - bc2d.Offset.y * sinAngle,
+						bc2d.Offset.x * sinAngle + bc2d.Offset.y * cosAngle
+					};
+
+					glm::vec3 colliderTranslation = translation + glm::vec3(rotatedOffset, 0.0f);
+					glm::vec3 colliderScale = scale * glm::vec3(bc2d.Size * 2.0f, 1.0f);
+
+					glm::mat4 colliderTransform = glm::translate(glm::mat4(1.0f), colliderTranslation)
+						* glm::rotate(glm::mat4(1.0f), rotation.z, glm::vec3(0, 0, 1))
+						* glm::scale(glm::mat4(1.0f), colliderScale);
+
+					Vesuvius::DrawRect(colliderTransform, glm::vec4(0, 1, 0, 1));
 				}
 			}
 
 			// Circle Colliders
 			{
-				auto view = m_ActiveScene->GetAllEntitiesWith<Cataclysm::TransformComponent, Cataclysm::CircleCollider2DComponent>();
+				auto view = m_ActiveScene->GetAllEntitiesWith<TransformComponent, CircleCollider2DComponent>();
 				for (auto entity : view)
 				{
-					auto [tc, cc2d] = view.get<Cataclysm::TransformComponent, Cataclysm::CircleCollider2DComponent>(entity);
+					auto [tc, cc2d] = view.get<TransformComponent, CircleCollider2DComponent>(entity);
+					glm::mat4 transform = tc.GlobalTransform;
 
-					glm::vec3 translation = tc.Translation + glm::vec3(cc2d.Offset, 0.001f);
-					glm::vec3 scale = tc.Scale * glm::vec3(cc2d.Radius * 2.0f);
-					
-					glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
-						* glm::scale(glm::mat4(1.0f), scale);
-					
-					Cataclysm::Vesuvius::DrawCircle(transform, glm::vec4(0, 1, 0, 1), 0.1f);
+					glm::vec3 translation, rotation, scale;
+					Math::DecomposeTransform(transform, translation, rotation, scale);
+
+					float cosAngle = cos(rotation.z);
+					float sinAngle = sin(rotation.z);
+
+					// Rotate offset vector in 2D plane (X,Y)
+					glm::vec2 rotatedOffset = {
+						cc2d.Offset.x * cosAngle - cc2d.Offset.y * sinAngle,
+						cc2d.Offset.x * sinAngle + cc2d.Offset.y * cosAngle
+					};
+
+					glm::vec3 colliderTranslation = translation + glm::vec3(rotatedOffset, 0.0f);					float maxScale = glm::max(scale.x, scale.y);
+					glm::vec3 colliderScale = glm::vec3(cc2d.Radius * 2.0f * maxScale, cc2d.Radius * 2.0f * maxScale, 1.0f);
+
+					glm::mat4 colliderTransform = glm::translate(glm::mat4(1.0f), colliderTranslation)
+						* glm::rotate(glm::mat4(1.0f), rotation.z, glm::vec3(0, 0, 1))
+						* glm::scale(glm::mat4(1.0f), colliderScale);
+
+					Vesuvius::DrawCircleDebug(colliderTransform, glm::vec4(0, 1, 0, 1), 0.05f);
 				}
 			}
 		}
@@ -200,7 +256,7 @@ namespace Cataclysm
 		if (Cataclysm::Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity())
 		{
 			const Cataclysm::TransformComponent& transform = selectedEntity.GetComponent<Cataclysm::TransformComponent>();
-			Cataclysm::Vesuvius::DrawRect(transform.GetTransform(), glm::vec4(1.0f, 0.65f, 0.0f, 1.0f));
+			Cataclysm::Vesuvius::DrawRect(transform.GlobalTransform, glm::vec4(1.0f, 0.65f, 0.0f, 1.0f));
 		}
 
 		Cataclysm::Vesuvius::EndScene();
@@ -276,11 +332,43 @@ namespace Cataclysm
 				ImGui::EndMenu();
 			}
 
-			if (ImGui::BeginMenu("Script"))
+			if (ImGui::BeginMenu("View"))
+			{
+				if (ImGui::BeginMenu("Panels"))
+				{
+					ImGui::MenuItem("Documentation", nullptr, &m_ShowDocumentationPanel);
+					ImGui::MenuItem("Frame", nullptr, &m_ShowFrameDebuggerPanel);
+					ImGui::MenuItem("Output", nullptr, &m_ShowOutputPanel);
+					ImGui::MenuItem("Profiler", nullptr, &m_ShowProfilerPanel);
+					ImGui::MenuItem("Vesuvius", nullptr, &m_ShowVesuviusPanel);
+
+					ImGui::EndMenu();
+				}
+
+				ImGui::Separator();
+
+				if (ImGui::MenuItem("Reset Editor Camera"))
+					m_EditorCamera.Reset();
+
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Project"))
 			{
 				if (ImGui::MenuItem("Reload assembly", "Ctrl+R"))
 					ScriptEngine::ReloadAssembly();
 
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Help"))
+			{
+				if (ImGui::MenuItem("Online Documentation"))
+				{
+					const std::string url = "https://jackpsmith.com/cataclysm/docs/";
+					std::string command = "start " + url;
+					system(command.c_str());
+				}
 				ImGui::EndMenu();
 			}
 
@@ -289,34 +377,42 @@ namespace Cataclysm
 
 		m_SceneHierarchyPanel.OnImGuiRender();
 		m_BrowserPanel->OnImGuiRender();
-		m_FrameDebuggerPanel->OnImGuiRender(ts);
-		m_OutputPanel->OnImGuiRender();
 
-		ImGui::Begin("Vesuvius");
+		if (m_ShowFrameDebuggerPanel)
+			m_FrameDebuggerPanel->OnImGuiRender(ts);
+		
+		if (m_ShowOutputPanel)
+			m_OutputPanel->OnImGuiRender(m_IconClear, m_IconError, m_IconWarning, m_IconTrace, m_IconInfo, m_IconErrorFaded, m_IconWarningFaded, m_IconTraceFaded, m_IconInfoFaded);
 
-#if 0
-		std::string name = "None";
-		if (m_HoveredEntity)
-			name = m_HoveredEntity.GetComponent<Cataclysm::TagComponent>().Tag;
+		if (m_ShowDocumentationPanel)
+			m_DocumentationPanel->OnImGuiRender();
 
-		ImGui::Text("Hovered Entity: %s", name.c_str());
-#endif
+		if (m_ShowProfilerPanel)
+			m_ProfilerPanel->OnImGuiRender();
 
-		auto stats = Cataclysm::Vesuvius::GetStats();
-		ImGui::Text("Draw Calls:  %d", stats.DrawCalls);
-		ImGui::Text("Quads:	   %d", stats.QuadCount);
-		ImGui::Text("Vertices:    %d", stats.GetTotalVertexCount());
-		ImGui::Text("Indices:     %d", stats.GetTotalIndexCount());
+		if (m_ShowVesuviusPanel)
+		{
+			ImGui::Begin("Vesuvius");
 
-		ImGui::End();
+			auto stats = Cataclysm::Vesuvius::GetStats();
+			ImGui::Text("Draw Calls:  %d", stats.DrawCalls);
+			ImGui::Text("Quads:	   %d", stats.QuadCount);
+			ImGui::Text("Vertices:    %d", stats.GetTotalVertexCount());
+			ImGui::Text("Indices:     %d", stats.GetTotalIndexCount());
 
+			ImGui::End();
+		}
+
+		/*
 		ImGui::Begin("Settings");
 		ImGui::Checkbox("Show physics colliders", &m_ShowPhysicsColliders);
 		// ImGui::Image((ImTextureID)s_Font->GetAtlasTexture()->GetRendererID(), { 512,512 }, { 0, 1 }, { 1, 0 });
 		ImGui::End();
+		*/
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-		ImGui::Begin("Viewport");
+
+		ImGui::Begin("Scene");
 		auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
 		auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
 		auto viewportOffset = ImGui::GetWindowPos();
@@ -359,42 +455,112 @@ namespace Cataclysm
 			//glm::mat4 cameraView = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());
 
 			// Editor camera
-			const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
-			glm::mat4 cameraView = m_EditorCamera.GetViewMatrix();
-
-			// Entity transform
-			auto& tc = selectedEntity.GetComponent<Cataclysm::TransformComponent>();
-			glm::mat4 transform = tc.GetTransform();
-
-			// Snapping
-			bool snap = Cataclysm::Input::IsKeyDown(Cataclysm::Key::LeftControl) || Cataclysm::Input::IsKeyDown(Cataclysm::Key::RightControl);
-			float snapValue = 0.5f; // Snap to 0.5m for translation/scale
-			// Snap to 45 degrees for rotation
-			if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
-				snapValue = 45.0f;
-
-			float snapValues[3] = { snapValue, snapValue, snapValue };
-
-			ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
-				(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform),
-				nullptr, snap ? snapValues : nullptr);
-
-			if (ImGuizmo::IsUsing())
+			if (m_SceneState == SceneState::Edit)
 			{
-				glm::vec3 translation, rotation, scale;
-				Cataclysm::Math::DecomposeTransform(transform, translation, rotation, scale);
+				const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
+				glm::mat4 cameraView = m_EditorCamera.GetViewMatrix();
 
-				glm::vec3 deltaRotation = rotation - tc.Rotation;
-				tc.Translation = translation;
-				tc.Rotation += deltaRotation;
-				tc.Scale = scale;
+				// Entity transform
+				auto& tc = selectedEntity.GetComponent<Cataclysm::TransformComponent>();
+
+				UUID entityID = selectedEntity.GetUUID();
+
+				// Step 1: Get parent's world transform
+				UUID parentID = m_ActiveScene->GetParent(entityID);
+				glm::mat4 parentTransform = glm::mat4(1.0f);
+				if (parentID)
+					parentTransform = m_ActiveScene->GetWorldTransform(parentID);
+
+				// Step 2: Get entity's current world transform
+				glm::mat4 worldTransform = m_ActiveScene->GetWorldTransform(entityID);
+
+				// Step 3: Pass world transform to ImGuizmo
+			
+				// Snapping
+				bool snap = Cataclysm::Input::IsKeyDown(Cataclysm::Key::LeftControl) || Cataclysm::Input::IsKeyDown(Cataclysm::Key::RightControl);
+				float snapValue = 0.5f; // Snap to 0.5m for translation/scale
+				// Snap to 45 degrees for rotation
+				if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
+					snapValue = 45.0f;
+
+				float snapValues[3] = { snapValue, snapValue, snapValue };
+				ImGuizmo::Manipulate(
+					glm::value_ptr(cameraView),
+					glm::value_ptr(cameraProjection),
+					(ImGuizmo::OPERATION)m_GizmoType,
+					ImGuizmo::WORLD, // WORLD because we’re using global matrix
+					glm::value_ptr(worldTransform),
+					nullptr,
+					snap ? snapValues : nullptr
+				);
+
+				// Step 4: Convert manipulated world transform back into local
+				if (ImGuizmo::IsUsing())
+				{
+					m_ActiveScene->SetWorldTransform(selectedEntity.GetUUID(), worldTransform);
+				}
+			}
+			else
+			{
+				Entity cameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
+
+				auto& cameraComponent = cameraEntity.GetComponent<CameraComponent>();
+				auto& transformComponent = cameraEntity.GetComponent<TransformComponent>();
+
+				glm::mat4 cameraProjection = cameraComponent.Camera.GetProjection();
+				glm::mat4 cameraTransform = transformComponent.GetTransform();
+				glm::mat4 cameraView = glm::inverse(cameraTransform);
+
+				// Entity transform
+				auto& tc = selectedEntity.GetComponent<Cataclysm::TransformComponent>();
+
+				UUID entityID = selectedEntity.GetUUID();
+
+				// Step 1: Get parent's world transform
+				UUID parentID = m_ActiveScene->GetParent(entityID);
+				glm::mat4 parentTransform = glm::mat4(1.0f);
+				if (parentID)
+					parentTransform = m_ActiveScene->GetWorldTransform(parentID);
+
+				// Step 2: Get entity's current world transform
+				glm::mat4 worldTransform = m_ActiveScene->GetWorldTransform(entityID);
+
+				// Step 3: Pass world transform to ImGuizmo
+
+				// Snapping
+				bool snap = Cataclysm::Input::IsKeyDown(Cataclysm::Key::LeftControl) || Cataclysm::Input::IsKeyDown(Cataclysm::Key::RightControl);
+				float snapValue = 0.5f; // Snap to 0.5m for translation/scale
+				// Snap to 45 degrees for rotation
+				if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
+					snapValue = 45.0f;
+
+				float snapValues[3] = { snapValue, snapValue, snapValue };
+				ImGuizmo::Manipulate(
+					glm::value_ptr(cameraView),
+					glm::value_ptr(cameraProjection),
+					(ImGuizmo::OPERATION)m_GizmoType,
+					ImGuizmo::WORLD, // WORLD because we’re using global matrix
+					glm::value_ptr(worldTransform),
+					nullptr,
+					snap ? snapValues : nullptr
+				);
+
+				// Step 4: Convert manipulated world transform back into local
+				if (ImGuizmo::IsUsing())
+				{
+					m_ActiveScene->SetWorldTransform(selectedEntity.GetUUID(), worldTransform);
+				}
+
 			}
 		}
 
 		ImGui::End();
 		ImGui::PopStyleVar();
 
+		m_GamePanel->OnImGuiRender(m_ActiveScene, ts, static_cast<int>(m_SceneState));
+
 		UI_Toolbar();
+		StatusBar();
 
 		ImGui::End();
 	}
@@ -409,7 +575,8 @@ namespace Cataclysm
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(buttonHovered.x, buttonHovered.y, buttonHovered.z, 0.5f));
 		const auto& buttonActive = colors[ImGuiCol_ButtonActive];
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(buttonActive.x, buttonActive.y, buttonActive.z, 0.5f));
-
+		
+		ImGui::GetStyle().WindowMinSize.y = 25.0f;
 		ImGui::Begin("##toolbar", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
 		bool toolbarEnabled = (bool)m_ActiveScene;
@@ -424,6 +591,8 @@ namespace Cataclysm
 		bool hasSimulateButton = m_SceneState == SceneState::Edit || m_SceneState == SceneState::Simulate;
 		bool hasPauseButton = m_SceneState != SceneState::Edit;
 
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+
 		if (hasPlayButton)
 		{
 			Cataclysm::Ref<Cataclysm::Texture2D> icon = (m_SceneState == SceneState::Edit || m_SceneState == SceneState::Simulate) ? m_IconPlay : m_IconStop;
@@ -436,21 +605,21 @@ namespace Cataclysm
 			}
 		}
 
-		if (hasSimulateButton)
-		{
-			if (hasPlayButton)
-				ImGui::SameLine();
+		//if (hasSimulateButton)
+		//{
+		//	if (hasPlayButton)
+		//		ImGui::SameLine();
 
-			Cataclysm::Ref<Cataclysm::Texture2D> icon = (m_SceneState == SceneState::Edit || m_SceneState == SceneState::Play) ? m_IconSimulate : m_IconStop;
-			//ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f));
-			if (ImGui::ImageButton((ImTextureID)(uint64_t)icon->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), tintColor) && toolbarEnabled)
-			{
-				if (m_SceneState == SceneState::Edit || m_SceneState == SceneState::Play)
-					OnSceneSimulate();
-				else if (m_SceneState == SceneState::Simulate)
-					OnSceneStop();
-			}
-		}
+		//	Cataclysm::Ref<Cataclysm::Texture2D> icon = (m_SceneState == SceneState::Edit || m_SceneState == SceneState::Play) ? m_IconSimulate : m_IconStop;
+		//	//ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f));
+		//	if (ImGui::ImageButton((ImTextureID)(uint64_t)icon->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), tintColor) && toolbarEnabled)
+		//	{
+		//		if (m_SceneState == SceneState::Edit || m_SceneState == SceneState::Play)
+		//			OnSceneSimulate();
+		//		else if (m_SceneState == SceneState::Simulate)
+		//			OnSceneStop();
+		//	}
+		//}
 		if (hasPauseButton)
 		{
 			bool isPaused = m_ActiveScene->IsPaused();
@@ -477,13 +646,170 @@ namespace Cataclysm
 			}
 		}
 
-		ImGui::PopStyleVar(2);
+		ImGui::PopStyleVar();
+
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - ((size * 8) + 10));
+
+		if (ImGui::ImageButton((ImTextureID)(uint64_t)m_IconResetCamera->GetRendererID(), ImVec2(size * 2.315, size), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), tintColor) && toolbarEnabled)
+		{
+			m_EditorCamera.Reset();
+		}
+		ImGui::SameLine();
+
+		ImGui::Spacing();
+		ImGui::SameLine();
+
+		if (m_ShowPhysicsColliders)
+		{
+			Ref<Texture2D> physicsIcon = m_IconShowPhysicsColliders;
+			if (ImGui::ImageButton((ImTextureID)(uint64_t)physicsIcon->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), tintColor) && toolbarEnabled)
+			{
+				m_ShowPhysicsColliders = !(m_ShowPhysicsColliders);
+			}
+		}
+		else
+		{
+			Ref<Texture2D> physicsIcon = m_IconShowPhysicsCollidersFaded;
+			if (ImGui::ImageButton((ImTextureID)(uint64_t)physicsIcon->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), tintColor) && toolbarEnabled)
+			{
+				m_ShowPhysicsColliders = !(m_ShowPhysicsColliders);
+			}
+		}
+
+		ImGui::SameLine();
+		ImGui::Spacing();
+
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+
+		ImGui::SameLine();
+		if (m_GizmoType == -1)
+		{
+			Ref<Texture2D> emptyIcon = m_IconEmpty;
+			if (ImGui::ImageButton((ImTextureID)(uint64_t)emptyIcon->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), tintColor) && toolbarEnabled)
+			{
+				m_GizmoType = -1;
+			}
+		}
+		else
+		{
+			Ref<Texture2D> emptyIcon = m_IconEmptyFaded;
+			if (ImGui::ImageButton((ImTextureID)(uint64_t)emptyIcon->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), tintColor) && toolbarEnabled)
+			{
+				m_GizmoType = -1;
+			}
+		}
+		
+		ImGui::SameLine();
+		if (m_GizmoType == 0)
+		{
+			Ref<Texture2D> translateIcon = m_IconTranslate;
+			if (ImGui::ImageButton((ImTextureID)(uint64_t)translateIcon->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), tintColor) && toolbarEnabled)
+			{
+				m_GizmoType = 0;
+			}
+		}
+		else
+		{
+			Ref<Texture2D> translateIcon = m_IconTranslateFaded;
+			if (ImGui::ImageButton((ImTextureID)(uint64_t)translateIcon->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), tintColor) && toolbarEnabled)
+			{
+				m_GizmoType = 0;
+			}
+		}
+
+		ImGui::SameLine();
+		if (m_GizmoType == 1)
+		{
+			Ref<Texture2D> rotateIcon = m_IconRotate;
+			if (ImGui::ImageButton((ImTextureID)(uint64_t)rotateIcon->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), tintColor) && toolbarEnabled)
+			{
+				m_GizmoType = 1;
+			}
+		}
+		else
+		{
+			Ref<Texture2D> rotateIcon = m_IconRotateFaded;
+			if (ImGui::ImageButton((ImTextureID)(uint64_t)rotateIcon->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), tintColor) && toolbarEnabled)
+			{
+				m_GizmoType = 1;
+			}
+		}
+
+		ImGui::SameLine();
+		if (m_GizmoType == 2)
+		{
+			Ref<Texture2D> scaleIcon = m_IconScale;
+			if (ImGui::ImageButton((ImTextureID)(uint64_t)scaleIcon->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), tintColor) && toolbarEnabled)
+			{
+				m_GizmoType = 2;
+			}
+		}
+		else
+		{
+			Ref<Texture2D> scaleIcon = m_IconScaleFaded;
+			if (ImGui::ImageButton((ImTextureID)(uint64_t)scaleIcon->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), tintColor) && toolbarEnabled)
+			{
+				m_GizmoType = 2;
+			}
+		}
+
+
+		ImGui::PopStyleVar(3);
 		ImGui::PopStyleColor(3);
 		ImGui::End();
 	}
 
+	void EditorLayer::StatusBar()
+	{
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+		float barHeight = 24.0f;
+
+		ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + viewport->Size.y - barHeight));
+		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, barHeight));
+		ImGui::SetNextWindowViewport(viewport->ID);
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 2));
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 0));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, IM_COL32(0, 0, 0, 255));
+		ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(100, 100, 100, 255));
+
+		ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionMax().x, 0), ImGuiCond_Always);
+		ImGui::Begin("##statusbar", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
+		
+		ImGui::Spacing();
+		ImGui::SameLine();
+
+		ImGui::Image((ImTextureID)(uint64_t)m_CataclysmLogo->GetRendererID(), ImVec2(18, 18), ImVec2(0, 1), ImVec2(1, 0));
+
+		ImGui::SameLine();
+		ImGui::Spacing();
+
+		ImGui::SameLine();
+		ImGui::Text("Cataclysm v1.0.1 - Copyright 2025 Jack P Smith");
+		ImGui::SameLine();
+
+		ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - 24);
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+		if (ImGui::ImageButton((ImTextureID)(uint64_t)m_IconDocumentation->GetRendererID(), ImVec2(18, 18), ImVec2(0, 1), ImVec2(1, 0)))
+		{
+			const std::string url = "https://jackpsmith.com/cataclysm/docs/";
+			std::string command = "start " + url;
+			system(command.c_str());
+		}
+		ImGui::PopStyleColor();
+		ImGui::End();
+		ImGui::PopStyleColor(2);
+		ImGui::PopStyleVar(4);
+	}
+
 	void EditorLayer::OnScenePlay()
 	{
+		ImGui::SetWindowFocus("Game");
 		if (m_SceneState == SceneState::Simulate)
 			OnSceneStop();
 
@@ -728,10 +1054,21 @@ namespace Cataclysm
 
 	void EditorLayer::SaveScene()
 	{
-		if (!m_EditorScenePath.empty())
-			SerializeScene(m_ActiveScene, m_EditorScenePath);
-		else
-			SaveSceneAs();
+		if (m_SceneState == SceneState::Edit)
+		{
+			if (!m_EditorScenePath.empty())
+				SerializeScene(m_ActiveScene, m_EditorScenePath);
+			else
+				SaveSceneAs();
+		}
+		else if (m_SceneState == SceneState::Play)
+		{
+			CC_CORE_WARN("Cannot save scene while in Play Mode!");
+		}
+		else if (m_SceneState == SceneState::Simulate)
+		{
+			CC_CORE_WARN("Cannot save scene while in Simulate Mode!");
+		}
 	}
 
 	void EditorLayer::SaveSceneAs()

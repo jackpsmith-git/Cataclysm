@@ -11,6 +11,9 @@
 
 #include "Platform/OpenGL/OpenGLContext.h"
 
+#include <stb_image.h>
+#include <direct.h>
+
 namespace Cataclysm
 {
 	static uint8_t s_GLFWWindowCount = 0;
@@ -72,6 +75,20 @@ namespace Cataclysm
 
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
+
+		GLFWimage icon;
+		const char* relativePath = "..\\Resources\\CataclysmLogo.png";
+		icon.pixels = stbi_load(relativePath, &icon.width, &icon.height, 0, 4);
+		// CC_CORE_INFO(icon.width + ", " + icon.height);
+		if (!icon.pixels)
+		{
+			CC_CORE_ERROR("[WindowsWindow::Init] Window icon contains no pixel data!");
+		}
+		else
+		{
+			glfwSetWindowIcon(m_Window, 1, &icon);
+			stbi_image_free(icon.pixels);
+		}
 
 		// Set GLFW callbacks
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)

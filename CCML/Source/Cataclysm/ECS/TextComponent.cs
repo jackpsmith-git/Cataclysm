@@ -35,5 +35,7 @@
 			get => InternalCalls.TextComponent_GetLineSpacing(Entity.ID);
 			set => InternalCalls.TextComponent_SetLineSpacing(Entity.ID, value);
 		}
+
+		public void Reset() => InternalCalls.TextComponent_Reset(Entity.ID);
 	}
 }

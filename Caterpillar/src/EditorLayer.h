@@ -5,6 +5,9 @@
 #include "Panels/BrowserPanel.h"
 #include "Panels/FrameDebuggerPanel.h"
 #include "Panels/OutputPanel.h"
+#include "Panels/GamePanel.h"
+#include "Panels/DocumentationPanel.h"
+#include "Panels/ProfilerPanel.h"
 
 #include "Cataclysm/Renderer/EditorCamera.h"
 
@@ -27,6 +30,7 @@ namespace Cataclysm
 		bool OnMouseButtonPressed(Cataclysm::MouseButtonPressedEvent& e);
 
 		void OnOverlayRender();
+		void StatusBar();
 
 		void NewProject();
 		bool OpenProject();
@@ -71,6 +75,9 @@ namespace Cataclysm
 
 		Cataclysm::Ref<Cataclysm::Texture2D> m_CheckerboardTexture;
 		Cataclysm::Ref<Cataclysm::Texture2D> m_JackPSmithLogoTexture;
+		Cataclysm::Ref<Cataclysm::Texture2D> m_CsharpLogo;
+		Cataclysm::Ref<Cataclysm::Texture2D> m_VS2022Logo;
+		Cataclysm::Ref<Cataclysm::Texture2D> m_LuaLogo;
 
 		bool m_ViewportFocused = false, m_ViewportHovered = false;
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
@@ -78,9 +85,15 @@ namespace Cataclysm
 
 		glm::vec4 m_SquareColor = { 0.2f, 0.3f, 0.8f, 1.0f };
 
-		int m_GizmoType = -1;
+		int m_GizmoType = 0;
 
 		bool m_ShowPhysicsColliders = false;
+
+		bool m_ShowDocumentationPanel = false;
+		bool m_ShowOutputPanel = true;
+		bool m_ShowVesuviusPanel = true;
+		bool m_ShowFrameDebuggerPanel = true;
+		bool m_ShowProfilerPanel = false;
 
 		enum class SceneState
 		{
@@ -93,7 +106,15 @@ namespace Cataclysm
 		Scope<BrowserPanel> m_BrowserPanel;
 		Scope<FrameDebuggerPanel> m_FrameDebuggerPanel;
 		Scope<OutputPanel> m_OutputPanel;
+		Scope<GamePanel> m_GamePanel;
+		Scope<DocumentationPanel> m_DocumentationPanel;
+		Scope<ProfilerPanel> m_ProfilerPanel;
 
-		Cataclysm::Ref<Cataclysm::Texture2D> m_IconPlay, m_IconPause, m_IconStep, m_IconSimulate, m_IconStop;
+		Cataclysm::Ref<Cataclysm::Texture2D> m_IconPlay, m_IconPause, m_IconStep, m_IconSimulate, m_IconStop, 
+			m_IconShowPhysicsColliders, m_IconTranslate, m_IconRotate, m_IconScale, 
+			m_IconShowPhysicsCollidersFaded, m_IconTranslateFaded, m_IconRotateFaded, m_IconScaleFaded, m_IconEmpty, m_IconEmptyFaded,
+			m_IconClear, m_IconDocumentation, m_IconResetCamera,
+			m_IconError, m_IconWarning, m_IconTrace, m_IconInfo,
+			m_IconErrorFaded, m_IconWarningFaded, m_IconTraceFaded, m_IconInfoFaded, m_CataclysmLogo;
 	};
 }

@@ -45,6 +45,6 @@
 #include "Cataclysm/Renderer/OrthographicCamera.h"
 #include "Cataclysm/Renderer/OrthographicCameraController.h"
 
-	// Vesuvius
+// ---Vesuvius---------------------------------------
 #include "Cataclysm/Renderer/Vesuvius/Vesuvius.h"
 // --------------------------------------------------

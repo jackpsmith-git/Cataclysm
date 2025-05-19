@@ -66,9 +66,26 @@ namespace Cataclysm
 
 		public static Vec4 operator +(Vec4 a, Vec4 b) => new Vec4((a.X + b.X), (a.Y + b.Y), (a.Z + b.Z), (a.W + b.W));
 		public static Vec4 operator *(Vec4 vector, float scalar) => new Vec4(vector.X * scalar, vector.Y * scalar, vector.Z * scalar, vector.W * scalar);
+		public static Vec4 operator -(Vec4 vector) => new Vec4(-vector.X, -vector.Y, -vector.Z, -vector.W);
+		public static Vec4 operator -(Vec4 a, Vec4 b) => new Vec4(a.X - b.X, a.Y - b.Y, a.Z - b.Z, a.W - b.W);
 
 		public float MagnitudeSquared() => ((X * X) + (Y * Y) + (Z * Z) + (W * W));
 		public float Magnitude() => (float)Math.Sqrt(MagnitudeSquared());
+		public static Vec4 Lerp(Vec4 a, Vec4 b, float timestep) => (a + (b - a) * timestep);
+		public static float DotProduct(Vec4 a, Vec4 b) => ((a.X * b.X) + (a.Y * b.Y) + (a.Z * b.Z) + (a.W * b.W));
+
+		public static Vec4 Normalized(Vec4 vector)
+		{
+			float magnitude = vector.Magnitude();
+			if (magnitude > 0)
+			{
+				return new Vec4(vector.X / magnitude, vector.Y / magnitude, vector.Z / magnitude, vector.W / magnitude);
+			}
+			else
+			{
+				return new Vec4(0.0f, 0.0f, 0.0f, 0.0f);
+			}
+		}
 
 		public override string ToString() => $"({X}, {Y}, {Z}, {W})";
 	}

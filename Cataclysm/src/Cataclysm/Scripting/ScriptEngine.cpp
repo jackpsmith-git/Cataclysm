@@ -34,9 +34,9 @@ namespace Cataclysm
 		{ "System.UInt32",		ScriptFieldType::UInt },
 		{ "System.UInt64",		ScriptFieldType::ULong },
 
-		{ "Cataclysm.Vector2",	ScriptFieldType::Vector2 },
-		{ "Cataclysm.Vector3",	ScriptFieldType::Vector3 },
-		{ "Cataclysm.Vector4",	ScriptFieldType::Vector4 },
+		{ "Cataclysm.Vec2",		ScriptFieldType::Vec2 },
+		{ "Cataclysm.Vec3",		ScriptFieldType::Vec3 },
+		{ "Cataclysm.Vec4",		ScriptFieldType::Vec4 },
 
 		{ "Cataclysm.Entity",	ScriptFieldType::Entity },
 	};
@@ -104,7 +104,7 @@ namespace Cataclysm
 			auto it = s_ScriptFieldTypeMap.find(typeName);
 			if (it == s_ScriptFieldTypeMap.end())
 			{
-				CC_CORE_WARN("[ScriptEngine::MonoTypeToScriptFieldType] Unknown type: {}", typeName);
+				CC_CORE_WARN("[ScriptEngine::MonoTypeToScriptFieldType] Cannot serialize field of type: \"{}\"", typeName);
 				return ScriptFieldType::None;
 			}
 
@@ -389,6 +389,169 @@ namespace Cataclysm
 			Scene* scene = GetSceneContext();
 			scene->RuntimeErrorHit("[ScriptEngine::OnUpdateEntity] Could not find ScriptInstance for entity '" + entity.GetName() + "'");
 		}
+	}
+
+	void ScriptEngine::OnCollisionEnter2D(Entity entity, Entity other)
+	{
+		bool isTrigger = false;
+		if (entity.HasComponent<BoxCollider2DComponent>())
+		{
+			isTrigger = entity.GetComponent<BoxCollider2DComponent>().IsTrigger;
+		}
+		else if (entity.HasComponent<CircleCollider2DComponent>())
+		{
+			isTrigger = entity.GetComponent<CircleCollider2DComponent>().IsTrigger;
+		}
+
+		bool otherIsTrigger = false;
+		if (other.HasComponent<BoxCollider2DComponent>())
+		{
+			otherIsTrigger = other.GetComponent<BoxCollider2DComponent>().IsTrigger;
+		}
+		else if (entity.HasComponent<CircleCollider2DComponent>())
+		{
+			otherIsTrigger = other.GetComponent<CircleCollider2DComponent>().IsTrigger;
+		}
+
+		if (!isTrigger && !otherIsTrigger)
+		{
+			auto uuid = entity.GetUUID();
+
+			MonoObject* instance = GetEntityScriptInstance(uuid)->GetManagedObject();
+			if (!instance)
+				return;
+
+			// Get the method
+			MonoClass* monoClass = mono_object_get_class(instance);
+			MonoMethod* method = mono_class_get_method_from_name(monoClass, "OnCollisionEnter2D", 1);
+			if (!method)
+				return;
+
+			// Create the C# Entity object for the 'other' entity
+			MonoObject* monoOtherEntity = CreateEntityInstance(other); // You need this
+
+			// Call the method
+			void* args[1] = { monoOtherEntity };
+			mono_runtime_invoke(method, instance, args, nullptr);
+		}
+		else if (isTrigger)
+		{
+			auto uuid = entity.GetUUID();
+
+			MonoObject* instance = GetEntityScriptInstance(uuid)->GetManagedObject();
+			if (!instance)
+				return;
+
+			// Get the method
+			MonoClass* monoClass = mono_object_get_class(instance);
+			MonoMethod* method = mono_class_get_method_from_name(monoClass, "OnTriggerEnter2D", 1);
+			if (!method)
+				return;
+
+			// Create the C# Entity object for the 'other' entity
+			MonoObject* monoOtherEntity = CreateEntityInstance(other); // You need this
+
+			// Call the method
+			void* args[1] = { monoOtherEntity };
+			mono_runtime_invoke(method, instance, args, nullptr);
+		}
+	}
+
+	void ScriptEngine::OnCollisionExit2D(Entity entity, Entity other)
+	{
+		bool isTrigger = false;
+		if (entity.HasComponent<BoxCollider2DComponent>())
+		{
+			isTrigger = entity.GetComponent<BoxCollider2DComponent>().IsTrigger;
+		}
+		else if (entity.HasComponent<CircleCollider2DComponent>())
+		{
+			isTrigger = entity.GetComponent<CircleCollider2DComponent>().IsTrigger;
+		}
+
+		bool otherIsTrigger = false;
+		if (other.HasComponent<BoxCollider2DComponent>())
+		{
+			otherIsTrigger = other.GetComponent<BoxCollider2DComponent>().IsTrigger;
+		}
+		else if (entity.HasComponent<CircleCollider2DComponent>())
+		{
+			otherIsTrigger = other.GetComponent<CircleCollider2DComponent>().IsTrigger;
+		}
+
+		if (!isTrigger && !otherIsTrigger)
+		{
+			auto uuid = entity.GetUUID();
+
+			MonoObject* instance = GetEntityScriptInstance(uuid)->GetManagedObject();
+			if (!instance)
+				return;
+
+			// Get the method
+			MonoClass* monoClass = mono_object_get_class(instance);
+			MonoMethod* method = mono_class_get_method_from_name(monoClass, "OnCollisionExit2D", 1);
+			if (!method)
+				return;
+
+			// Create the C# Entity object for the 'other' entity
+			MonoObject* monoOtherEntity = CreateEntityInstance(other); // You need this
+
+			// Call the method
+			void* args[1] = { monoOtherEntity };
+			mono_runtime_invoke(method, instance, args, nullptr);
+		}
+		else if (isTrigger)
+		{
+			auto uuid = entity.GetUUID();
+
+			MonoObject* instance = GetEntityScriptInstance(uuid)->GetManagedObject();
+			if (!instance)
+				return;
+
+			// Get the method
+			MonoClass* monoClass = mono_object_get_class(instance);
+			MonoMethod* method = mono_class_get_method_from_name(monoClass, "OnTriggerExit2D", 1);
+			if (!method)
+				return;
+
+			// Create the C# Entity object for the 'other' entity
+			MonoObject* monoOtherEntity = CreateEntityInstance(other); // You need this
+
+			// Call the method
+			void* args[1] = { monoOtherEntity };
+			mono_runtime_invoke(method, instance, args, nullptr);
+		}
+
+	}
+
+	MonoObject* ScriptEngine::CreateEntityInstance(Entity entity)
+	{
+		MonoClass* entityClass = mono_class_from_name(s_Data->AppAssemblyImage, "Cataclysm", "Entity");
+		if (!entityClass)
+		{
+			// std::cerr << "[ScriptEngine] Failed to find 'Cataclysm.Entity' class" << std::endl;
+			return nullptr;
+		}
+
+		MonoObject* instance = mono_object_new(s_Data->AppDomain, entityClass);
+		if (!instance)
+		{
+			std::cerr << "[ScriptEngine] Failed to create MonoObject for 'Entity'" << std::endl;
+			return nullptr;
+		}
+
+		MonoMethod* ctor = mono_class_get_method_from_name(entityClass, ".ctor", 1);
+		if (!ctor)
+		{
+			std::cerr << "[ScriptEngine] Failed to find constructor for 'Entity'" << std::endl;
+			return nullptr;
+		}
+
+		uint64_t id = entity.GetUUID();
+		void* args[1] = { &id };
+		mono_runtime_invoke(ctor, instance, args, nullptr);
+
+		return instance;
 	}
 
 	MonoObject* ScriptEngine::GetManagedInstance(UUID uuid)

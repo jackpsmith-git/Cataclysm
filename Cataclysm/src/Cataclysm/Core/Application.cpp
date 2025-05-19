@@ -43,16 +43,12 @@ namespace Cataclysm
 
 	void Application::PushLayer(Layer* layer)
 	{
-		CC_PROFILE_FUNCTION();
-
 		m_LayerStack.PushLayer(layer);
 		layer->OnAttach();
 	}
 
 	void Application::PushOverlay(Layer* overlay)
 	{
-		CC_PROFILE_FUNCTION();
-
 		m_LayerStack.PushOverlay(overlay);
 		overlay->OnAttach();
 	}
@@ -85,8 +81,6 @@ namespace Cataclysm
 
 		while (m_Running)
 		{
-			CC_PROFILE_SCOPE("RunLoop");
-
 			float time = Time::GetTime();
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
@@ -139,8 +133,6 @@ namespace Cataclysm
 	
 	bool Application::OnWindowResize(WindowResizeEvent& e)
 	{
-		CC_PROFILE_FUNCTION();
-
 		if (e.GetWidth() == 0 || e.GetHeight() == 0)
 		{
 			m_Minimized = true;

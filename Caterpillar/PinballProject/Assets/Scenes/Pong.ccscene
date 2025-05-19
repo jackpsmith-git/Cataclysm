@@ -1,0 +1,154 @@
+Scene: New Scene
+Entities:
+  - Entity: 4700588661123254154
+    Enabled: true
+    TagComponent:
+      Tag: Wall
+    TransformComponent:
+      Translation: [0, -5.5, 0]
+      Rotation: [0, 0, 0]
+      Scale: [10, 0.300000012, 1]
+    Rigidbody2DComponent:
+      BodyType: Kinematic
+      FixedRotation: true
+      GravityScale: 0
+      Mass: 0
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 1
+      RestitutionThreshold: 1
+      IsTrigger: false
+    SpriteRendererComponent:
+      Color: [0.305882365, 0.305882365, 0.305882365, 1]
+      TilingFactor: 1
+  - Entity: 873301939940793368
+    Enabled: true
+    TagComponent:
+      Tag: Wall
+    TransformComponent:
+      Translation: [0, 5.5, 0]
+      Rotation: [0, 0, 0]
+      Scale: [10, 0.300000012, 1]
+    Rigidbody2DComponent:
+      BodyType: Kinematic
+      FixedRotation: true
+      GravityScale: 0
+      Mass: 1
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 1
+      RestitutionThreshold: 1
+      IsTrigger: false
+    SpriteRendererComponent:
+      Color: [0.305019319, 0.305019319, 0.305019319, 1]
+      TilingFactor: 1
+  - Entity: 131993437810563358
+    Enabled: true
+    TagComponent:
+      Tag: RightPaddle
+    TransformComponent:
+      Translation: [5, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [0.300000012, 3, 1]
+    Rigidbody2DComponent:
+      BodyType: Dynamic
+      FixedRotation: true
+      GravityScale: 0
+      Mass: 1
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 1
+      RestitutionThreshold: 1
+      IsTrigger: false
+    ScriptComponent:
+      ClassName: Pinball.TestScript
+      ScriptFields:
+        []
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TilingFactor: 1
+  - Entity: 14321392094916988369
+    Enabled: true
+    TagComponent:
+      Tag: LeftPaddle
+    TransformComponent:
+      Translation: [-5, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [0.300000012, 3, 1]
+    Rigidbody2DComponent:
+      BodyType: Dynamic
+      FixedRotation: true
+      GravityScale: 0
+      Mass: 1
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 1
+      RestitutionThreshold: 1
+      IsTrigger: false
+    ScriptComponent:
+      ClassName: Pinball.TestScript
+      ScriptFields:
+        - Name: IsLeft
+          Type: Bool
+          Data: true
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TilingFactor: 1
+  - Entity: 3356236722976073150
+    Enabled: true
+    TagComponent:
+      Tag: MainCamera
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 1
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 1000
+        OrthographicSize: 12
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 9341139020355923487
+    Enabled: true
+    TagComponent:
+      Tag: Ball
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [0.5, 0.5, 1]
+    Rigidbody2DComponent:
+      BodyType: Dynamic
+      FixedRotation: false
+      GravityScale: 0
+      Mass: 1
+    CircleCollider2DComponent:
+      Offset: [0, 0]
+      Radius: 0.5
+      Density: 1
+      Friction: 0.5
+      Restitution: 1
+      RestitutionThreshold: 1
+      IsTrigger: false
+    ScriptComponent:
+      ClassName: Pinball.Ball
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: Textures\ball.png
+      TilingFactor: 1

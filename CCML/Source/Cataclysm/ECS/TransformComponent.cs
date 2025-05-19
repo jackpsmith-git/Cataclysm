@@ -44,6 +44,33 @@
 			}
 		}
 
+		public Vec3 GlobalTranslation
+		{
+			get
+			{
+				InternalCalls.TransformComponent_GetGlobalTranslation(Entity.ID, out Vec3 translation);
+				return translation;
+			}
+		}
+
+		public Vec3 GlobalRotation
+		{
+			get
+			{
+				InternalCalls.TransformComponent_GetGlobalRotation(Entity.ID, out Vec3 rotation);
+				return rotation;
+			}
+		}
+
+		public Vec3 GlobalScale
+		{
+			get
+			{
+				InternalCalls.TransformComponent_GetGlobalScale(Entity.ID, out Vec3 scale);
+				return scale;
+			}
+		}
+
 		public void Translate(Vec3 translation)
 		{
 			Translation += translation;
@@ -53,5 +80,7 @@
 		{
 			Rotation += rotation;
 		}
+
+		public void Reset() => InternalCalls.TransformComponent_Reset(Entity.ID);
 	}
 }

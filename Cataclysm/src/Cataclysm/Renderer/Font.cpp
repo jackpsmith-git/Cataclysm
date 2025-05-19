@@ -113,7 +113,7 @@ namespace Cataclysm
 		}
 
 
-		m_AtlasTexture = CreateAndCacheAtlas<uint8_t, float, 3, msdf_atlas::msdfGenerator>("Test", (float)emSize, m_Data->Glyphs, m_Data->FontGeometry, width, height);
+		m_AtlasTexture = CreateAndCacheAtlas<uint8_t, float, 3, msdf_atlas::msdfGenerator>(fileString, (float)emSize, m_Data->Glyphs, m_Data->FontGeometry, width, height);
 #if 0
 		msdfgen::Shape shape;
 		if (msdfgen::loadGlyph(shape, font, 'C'))
@@ -127,6 +127,7 @@ namespace Cataclysm
 #endif
 		msdfgen::destroyFont(font);
 		msdfgen::deinitializeFreetype(ft);
+
 	}
 
 	Font::~Font()

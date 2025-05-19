@@ -8,9 +8,8 @@ namespace Cataclysm
 {
 	void FrameDebuggerPanel::OnImGuiRender(Timestep ts)
 	{
-		ImGui::Begin("Frame Debugger");
-		
-		float sample = ts.GetMilliseconds();
+		ImGui::Begin("Frame");
+		float sample = 1 / (ts.GetSeconds());
 		samples[0] = sample;
 
 		for (int n = 99; n > 0; n--)
@@ -19,15 +18,19 @@ namespace Cataclysm
 		float min = *std::min_element(samples, samples + sizeof(samples) / sizeof(samples[0]));
 		float max = *std::max_element(samples, samples + sizeof(samples) / sizeof(samples[0]));
 
-		ImGui::PlotLines("Frametime", samples, 100, 0, "", min, max);
+		ImGui::PlotLines("", samples, 100, 0, "", 0, 300, ImVec2(ImGui::GetContentRegionAvail().x, 100));
 
-		ImGui::Text("Frametime:");
-		ImGui::SameLine();
-		ImGui::LabelText(std::to_string(ts.GetMilliseconds()).c_str(), "%0.00"); // Frametime
-
+		ImGui::PushItemWidth(20.0f);
 		ImGui::Text("Framerate:");
+		ImGui::PopItemWidth();
 		ImGui::SameLine();
-		ImGui::LabelText(std::to_string(1 / ts.GetSeconds()).c_str(), "%0"); // Framerate
+		ImGui::Text("%.2f", 1.0f / ts.GetSeconds());
+
+		ImGui::PushItemWidth(20.0f);
+		ImGui::Text("Frametime:");
+		ImGui::PopItemWidth();
+		ImGui::SameLine();
+		ImGui::Text("%.2f", ts.GetMilliseconds());
 
 		ImGui::End();
 	}

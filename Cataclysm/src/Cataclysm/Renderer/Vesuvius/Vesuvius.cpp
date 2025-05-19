@@ -132,8 +132,6 @@ namespace Cataclysm
 
 	void Vesuvius::BeginScene(const Camera& camera, const glm::mat4& transform)
 	{
-		CC_PROFILE_FUNCTION();
-
 		s_Data.CameraBuffer.ViewProjection = camera.GetProjection() * glm::inverse(transform);
 		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(VesuviusData::CameraData));
 
@@ -142,8 +140,6 @@ namespace Cataclysm
 
 	void Vesuvius::StartBatch()
 	{
-		CC_PROFILE_FUNCTION();
-
 		s_Data.QuadIndexCount = 0;
 		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
 
@@ -161,8 +157,6 @@ namespace Cataclysm
 
 	void Vesuvius::BeginScene(const EditorCamera& camera)
 	{
-		CC_PROFILE_FUNCTION();
-
 		s_Data.CameraBuffer.ViewProjection = camera.GetViewProjection();
 		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(VesuviusData::CameraData));
 
@@ -171,8 +165,6 @@ namespace Cataclysm
 
 	void Vesuvius::BeginScene(const OrthographicCamera& camera)
 	{
-		CC_PROFILE_FUNCTION();
-
 		s_Data.CameraBuffer.ViewProjection = camera.GetViewProjectionMatrix();
 		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(VesuviusData::CameraData));
 
@@ -181,8 +173,6 @@ namespace Cataclysm
 
 	void Vesuvius::EndScene()
 	{
-		CC_PROFILE_FUNCTION();
-
 		Flush();
 	}
 
@@ -230,7 +220,9 @@ namespace Cataclysm
 			uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.TextVertexBufferPtr - (uint8_t*)s_Data.TextVertexBufferBase);
 			s_Data.TextVertexBuffer->SetData(s_Data.TextVertexBufferBase, dataSize);
 			auto buf = s_Data.TextVertexBufferBase;
+
 			s_Data.FontAtlasTexture->Bind(0);
+
 			s_Data.TextShader->Bind();
 			RenderCommand::DrawIndexed(s_Data.TextVertexArray, s_Data.TextIndexCount);
 			s_Data.Stats.DrawCalls++;
@@ -253,23 +245,23 @@ namespace Cataclysm
 		if (s_Data.QuadIndexCount >= VesuviusData::MaxIndices)
 			NextBatch();
 
-			float textureIndex = 0.0f;
+		float textureIndex = 0.0f;
 
-			for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
+		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
+		{
+			if (*s_Data.TextureSlots[i].get() == *texture.get())
 			{
-				if (*s_Data.TextureSlots[i].get() == *texture.get())
-				{
-					textureIndex = (float)i;
-					break;
-				}
+				textureIndex = (float)i;
+				break;
 			}
+		}
 
-			if (textureIndex == 0.0f)
-			{
-				textureIndex = (float)s_Data.TextureSlotIndex;
-				s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
-				s_Data.TextureSlotIndex++;
-			}
+		if (textureIndex == 0.0f)
+		{
+			textureIndex = (float)s_Data.TextureSlotIndex;
+			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
+			s_Data.TextureSlotIndex++;
+		}
 
 		for (size_t i = 0; i < quadVertexCount; i++)
 		{
@@ -327,9 +319,10 @@ namespace Cataclysm
 	void Vesuvius::DrawCircle(const glm::mat4& transform, const glm::vec4& color, float thickness, float fade, int entityID)
 	{
 		CC_PROFILE_FUNCTION();
-		// TODO: implement for circles
-		// if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
-		// 	NextBatch();
+
+		//if (s_Data.CircleIndexCount >= VesuviusData::MaxIndices)
+		//	NextBatch();
+
 		for (size_t i = 0; i < 4; i++)
 		{
 			s_Data.CircleVertexBufferPtr->WorldPosition = transform * s_Data.QuadVertexPositions[i];
@@ -342,6 +335,30 @@ namespace Cataclysm
 		}
 		s_Data.CircleIndexCount += 6;
 		s_Data.Stats.QuadCount++;
+	}
+
+	void Vesuvius::DrawCircleDebug(const glm::mat4& transform, const glm::vec4& color, float thickness, float fade, int entityID)
+	{
+		const int segments = 64;
+		const float radius = 0.5f;
+
+		glm::vec3 lastPoint;
+
+		for (int i = 0; i <= segments; ++i)
+		{
+			float angle = (float)i / segments * glm::two_pi<float>();
+			glm::vec3 point = glm::vec3(radius * cos(angle), radius * sin(angle), 0.0f);
+
+			glm::vec3 worldPos = glm::vec3(transform * glm::vec4(point, 1.0f));
+
+			if (i > 0)
+			{
+				// You must have a function like DrawLine that draws lines in world space
+				Vesuvius::DrawLine(lastPoint, worldPos, color);
+			}
+
+			lastPoint = worldPos;
+		}
 	}
 
 	void Vesuvius::DrawSprite(const glm::mat4& transform, SpriteRendererComponent& src, int entityID)
@@ -381,11 +398,20 @@ namespace Cataclysm
 
 	void Vesuvius::DrawString(const std::string& string, Ref<Font> font, const glm::mat4& transform, const TextParams& textParams, int entityID)
 	{
+		CC_PROFILE_FUNCTION();
+
 		const auto& fontGeometry = font->GetMSDFData()->FontGeometry;
 		const auto& metrics = fontGeometry.getMetrics();
 
 		Ref<Texture2D> fontAtlas = font->GetAtlasTexture();
-		s_Data.FontAtlasTexture = fontAtlas;
+
+		if (s_Data.FontAtlasTexture != fontAtlas)
+		{
+			Flush();
+			StartBatch();
+			s_Data.FontAtlasTexture = fontAtlas;
+		}
+		// s_Data.FontAtlasTexture = fontAtlas;
 
 		double x = 0.0;
 		double fsScale = 1.0 / (metrics.ascenderY - metrics.descenderY);
@@ -495,7 +521,7 @@ namespace Cataclysm
 
 	void Vesuvius::DrawString(const std::string& string, const glm::mat4& transform, const TextComponent& component, int entityID)
 	{
-		DrawString(string, component.FontAsset, transform, { component.Color, component.Kerning, component.LineSpacing }, entityID);
+		DrawString(string, Font::GetFont(component.FontPath), transform, { component.Color, component.Kerning, component.LineSpacing }, entityID);
 	}
 
 	float Vesuvius::GetLineWidth()

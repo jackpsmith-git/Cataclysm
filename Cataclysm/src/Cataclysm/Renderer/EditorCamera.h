@@ -34,6 +34,36 @@ namespace Cataclysm
 
 		float GetPitch() const { return m_Pitch; }
 		float GetYaw() const { return m_Yaw; }
+
+		void Reset() {
+			m_FOV = 45.0f;
+			m_AspectRatio = 1.778f;
+			m_NearClip = 0.1f;
+			m_FarClip = 1000.0f;
+			m_Position = { 0.0f, 0.0f, -10.0f };
+			m_FocalPoint = { 0.0f, 0.0f, 0.0f };
+			m_Distance = 10.0f;
+			m_Pitch = 0.0f;
+			m_Yaw = 0.0f;
+			UpdateProjection();
+			UpdateView();
+		}
+
+		void CopyValues(float fov, float aspectRatio, float nearClip, float farClip, glm::vec3 position, glm::vec3 focalPoint, float distance, float pitch, float yaw, float viewportWidth, float viewportHeight) {
+			m_FOV = fov;
+			m_AspectRatio = aspectRatio;
+			m_NearClip = nearClip;
+			m_FarClip = farClip;
+			m_Position = position;
+			m_FocalPoint = focalPoint;
+			m_Distance = distance;
+			m_Pitch = pitch;
+			m_Yaw = yaw;
+			m_ViewportWidth = viewportWidth;
+			m_ViewportHeight = viewportHeight;
+			UpdateProjection();
+			UpdateView();
+		}
 	private:
 		void UpdateProjection();
 		void UpdateView();

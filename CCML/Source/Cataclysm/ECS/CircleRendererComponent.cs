@@ -38,5 +38,7 @@
 			get => InternalCalls.CircleRendererComponent_GetFade(Entity.ID);
 			set => InternalCalls.CircleRendererComponent_SetFade(Entity.ID, value);
 		}
+
+		public void Reset() => InternalCalls.CircleRendererComponent_Reset(Entity.ID);
 	}
 }

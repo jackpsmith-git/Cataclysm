@@ -172,222 +172,10 @@ namespace Cataclysm
 
 	}
 
-	static void SerializeEntity(YAML::Emitter& out, Entity entity)
-	{
-		CC_CORE_ASSERT("Serialization Failed!", entity.HasComponent<IDComponent>());
-
-		out << YAML::BeginMap;
-		out << YAML::Key << "Entity" << YAML::Value << entity.GetUUID();
-
-		/// TAG COMPONENT
-		if (entity.HasComponent<TagComponent>())
-		{
-			out << YAML::Key << "TagComponent";
-			out << YAML::BeginMap;
-
-			auto& tag = entity.GetComponent<TagComponent>().Tag;
-			out << YAML::Key << "Tag" << YAML::Value << tag;
-
-			out << YAML::EndMap;
-		}
-
-		// TRANSFORM COMPONENT
-		if (entity.HasComponent<TransformComponent>())
-		{
-			out << YAML::Key << "TransformComponent";
-			out << YAML::BeginMap;
-
-			auto& tc = entity.GetComponent<TransformComponent>();
-			out << YAML::Key << "Translation" << YAML::Value << tc.Translation;
-			out << YAML::Key << "Rotation" << YAML::Value << tc.Rotation;
-			out << YAML::Key << "Scale" << YAML::Value << tc.Scale;
-
-			out << YAML::EndMap;
-		}
-
-		// CAMERA COMPONENT
-		if (entity.HasComponent<CameraComponent>())
-		{
-			out << YAML::Key << "CameraComponent";
-			out << YAML::BeginMap;
-
-			auto& cameraComponent = entity.GetComponent<CameraComponent>();
-			auto& camera = cameraComponent.Camera;
-
-			out << YAML::Key << "Camera" << YAML::Value;
-			out << YAML::BeginMap;
-			out << YAML::Key << "ProjectionType" << YAML::Value << (int)camera.GetProjectionType();
-			out << YAML::Key << "PerspectiveFOV" << YAML::Value << camera.GetPerspectiveVerticalFOV();
-			out << YAML::Key << "PerspectiveNear" << YAML::Value << camera.GetPerspectiveNearClip();
-			out << YAML::Key << "PerspectiveFar" << YAML::Value << camera.GetPerspectiveFarClip();
-			out << YAML::Key << "OrthographicSize" << YAML::Value << camera.GetOrthographicSize();
-			out << YAML::Key << "OrthographicNear" << YAML::Value << camera.GetOrthographicNearClip();
-			out << YAML::Key << "OrthographicFar" << YAML::Value << camera.GetOrthographicFarClip();
-			out << YAML::EndMap;
-
-			out << YAML::Key << "Primary" << YAML::Value << cameraComponent.Primary;
-			out << YAML::Key << "FixedAspectRatio" << YAML::Value << cameraComponent.FixedAspectRatio;
-
-			out << YAML::EndMap;
-		}
-
-		// RIGIDBODY 2D COMPONENT
-		if (entity.HasComponent<Rigidbody2DComponent>())
-		{
-			out << YAML::Key << "Rigidbody2DComponent";
-			out << YAML::BeginMap;
-
-			auto& rb2dComponent = entity.GetComponent<Rigidbody2DComponent>();
-			out << YAML::Key << "BodyType" << YAML::Value << RigidBody2DBodyTypeToString(rb2dComponent.Type);
-			out << YAML::Key << "FixedRotation" << YAML::Value << rb2dComponent.FixedRotation;
-
-			out << YAML::EndMap;
-		}
-
-		// BOX COLLIDER 2D COMPONENT
-		if (entity.HasComponent<BoxCollider2DComponent>())
-		{
-			out << YAML::Key << "BoxCollider2DComponent";
-			out << YAML::BeginMap;
-
-			auto& bc2dComponent = entity.GetComponent<BoxCollider2DComponent>();
-			out << YAML::Key << "Offset" << YAML::Value << bc2dComponent.Offset;
-			out << YAML::Key << "Size" << YAML::Value << bc2dComponent.Size;
-			out << YAML::Key << "Density" << YAML::Value << bc2dComponent.Density;
-			out << YAML::Key << "Friction" << YAML::Value << bc2dComponent.Friction;
-			out << YAML::Key << "Restitution" << YAML::Value << bc2dComponent.Restitution;
-			out << YAML::Key << "RestitutionThreshold" << YAML::Value << bc2dComponent.RestitutionThreshold;
-
-			out << YAML::EndMap;
-		}
-
-		// CIRCLE COLLIDER 2D COMPONENT
-		if (entity.HasComponent<CircleCollider2DComponent>())
-		{
-			out << YAML::Key << "CircleCollider2DComponent";
-			out << YAML::BeginMap;
-
-			auto& cc2dComponent = entity.GetComponent<CircleCollider2DComponent>();
-			out << YAML::Key << "Offset" << YAML::Value << cc2dComponent.Offset;
-			out << YAML::Key << "Radius" << YAML::Value << cc2dComponent.Radius;
-			out << YAML::Key << "Density" << YAML::Value << cc2dComponent.Density;
-			out << YAML::Key << "Friction" << YAML::Value << cc2dComponent.Friction;
-			out << YAML::Key << "Restitution" << YAML::Value << cc2dComponent.Restitution;
-			out << YAML::Key << "RestitutionThreshold" << YAML::Value << cc2dComponent.RestitutionThreshold;
-
-			out << YAML::EndMap;
-		}
-
-		// SCRIPT COMPONENT
-		if (entity.HasComponent<MonoScriptComponent>())
-		{
-			auto& scriptComponent = entity.GetComponent<MonoScriptComponent>();
-
-			out << YAML::Key << "ScriptComponent";
-			out << YAML::BeginMap;
-			out << YAML::Key << "ClassName" << YAML::Value << scriptComponent.ClassName;
-
-			// Fields
-			Ref<ScriptClass> entityClass = ScriptEngine::GetEntityClass(scriptComponent.ClassName);
-			const auto& fields = entityClass->GetFields();
-			if (fields.size() > 0)
-			{
-				out << YAML::Key << "ScriptFields" << YAML::Value;
-				auto& entityFields = ScriptEngine::GetScriptFieldMap(entity);
-				out << YAML::BeginSeq;
-				for (const auto& [name, field] : fields)
-				{
-					if (entityFields.find(name) == entityFields.end())
-						continue;
-
-					out << YAML::BeginMap;
-					out << YAML::Key << "Name" << YAML::Value << name;
-					out << YAML::Key << "Type" << YAML::Value << Utils::ScriptFieldTypeToString(field.Type);
-
-					out << YAML::Key << "Data" << YAML::Value;
-					ScriptFieldInstance& scriptField = entityFields.at(name);
-
-					switch (field.Type)
-					{
-						WRITE_SCRIPT_FIELD(Float, float);
-						WRITE_SCRIPT_FIELD(Double, double);
-						WRITE_SCRIPT_FIELD(Bool, bool);
-						WRITE_SCRIPT_FIELD(Char, char);
-						WRITE_SCRIPT_FIELD(Byte, int8_t);
-						WRITE_SCRIPT_FIELD(Short, int16_t);
-						WRITE_SCRIPT_FIELD(Int, int32_t);
-						WRITE_SCRIPT_FIELD(Long, int64_t);
-						WRITE_SCRIPT_FIELD(UByte, uint8_t);
-						WRITE_SCRIPT_FIELD(UShort, uint16_t);
-						WRITE_SCRIPT_FIELD(UInt, uint32_t);
-						WRITE_SCRIPT_FIELD(ULong, uint64_t);
-						WRITE_SCRIPT_FIELD(Vector2, glm::vec2);
-						WRITE_SCRIPT_FIELD(Vector3, glm::vec3);
-						WRITE_SCRIPT_FIELD(Vector4, glm::vec4);
-						WRITE_SCRIPT_FIELD(Entity, UUID);
-					}
-					out << YAML::EndMap;
-				}
-				out << YAML::EndSeq;
-			}
-
-			out << YAML::EndMap;
-		}
-
-		// SPRITE RENDERER COMPONENT
-		if (entity.HasComponent<SpriteRendererComponent>())
-		{
-			out << YAML::Key << "SpriteRendererComponent";
-			out << YAML::BeginMap;
-
-			auto& spriteRendererComponent = entity.GetComponent<SpriteRendererComponent>();
-			out << YAML::Key << "Color" << YAML::Value << spriteRendererComponent.Color;
-
-			if (spriteRendererComponent.Texture)
-			{
-				std::string sub = "Textures\\";
-				std::string path = spriteRendererComponent.Texture->GetPath();
-				size_t position = path.find(sub);
-				
-				out << YAML::Key << "TexturePath" << YAML::Value << path.substr(position);
-			}
-
-			out << YAML::Key << "TilingFactor" << YAML::Value << spriteRendererComponent.TilingFactor;
-
-			out << YAML::EndMap;
-		}
-
-		// CIRCLE RENDERER COMPONENT
-		if (entity.HasComponent<CircleRendererComponent>())
-		{
-			out << YAML::Key << "CircleRendererComponent";
-			out << YAML::BeginMap;
-			auto& circleRendererComponent = entity.GetComponent<CircleRendererComponent>();
-			out << YAML::Key << "Color" << YAML::Value << circleRendererComponent.Color;
-			out << YAML::Key << "Thickness" << YAML::Value << circleRendererComponent.Thickness;
-			out << YAML::Key << "Fade" << YAML::Value << circleRendererComponent.Fade;
-			out << YAML::EndMap;
-		}
-
-		// TEXT COMPONENT
-		if (entity.HasComponent<TextComponent>())
-		{
-			out << YAML::Key << "TextComponent";
-			out << YAML::BeginMap; // TextComponent
-			auto& textComponent = entity.GetComponent<TextComponent>();
-			out << YAML::Key << "TextString" << YAML::Value << textComponent.TextString;
-			// TODO: textComponent.FontAsset
-			out << YAML::Key << "Color" << YAML::Value << textComponent.Color;
-			out << YAML::Key << "Kerning" << YAML::Value << textComponent.Kerning;
-			out << YAML::Key << "LineSpacing" << YAML::Value << textComponent.LineSpacing;
-			out << YAML::EndMap; // TextComponent
-		}
-
-		out << YAML::EndMap;
-	}
-
 	void SceneSerializer::Serialize(const std::string& filepath)
 	{
+		CC_CORE_WARN("[SceneSerializer::Serialize] Saving in progress. Do not close app or edit scene data!");
+
 		YAML::Emitter out;
 		out << YAML::BeginMap;
 		out << YAML::Key << "Scene" << YAML::Value << "New Scene";
@@ -398,13 +186,236 @@ namespace Cataclysm
 				if (!entity)
 					return;
 
-				SerializeEntity(out, entity);
+				CC_CORE_ASSERT("Serialization Failed!", entity.HasComponent<IDComponent>());
+
+				out << YAML::BeginMap;
+				out << YAML::Key << "Entity" << YAML::Value << entity.GetUUID();
+				out << YAML::Key << "Enabled" << YAML::Value << entity.GetComponent<IDComponent>().Enabled;
+
+				/// TAG COMPONENT
+				if (entity.HasComponent<TagComponent>())
+				{
+					out << YAML::Key << "TagComponent";
+					out << YAML::BeginMap;
+
+					auto& tag = entity.GetComponent<TagComponent>().Tag;
+					out << YAML::Key << "Tag" << YAML::Value << tag;
+
+					out << YAML::EndMap;
+				}
+
+				// TRANSFORM COMPONENT
+				if (entity.HasComponent<TransformComponent>())
+				{
+					out << YAML::Key << "TransformComponent";
+					out << YAML::BeginMap;
+
+					auto& tc = entity.GetComponent<TransformComponent>();
+					out << YAML::Key << "Translation" << YAML::Value << tc.Translation;
+					out << YAML::Key << "Rotation" << YAML::Value << tc.Rotation;
+					out << YAML::Key << "Scale" << YAML::Value << tc.Scale;
+
+					out << YAML::EndMap;
+				}
+
+				// CAMERA COMPONENT
+				if (entity.HasComponent<CameraComponent>())
+				{
+					out << YAML::Key << "CameraComponent";
+					out << YAML::BeginMap;
+
+					auto& cameraComponent = entity.GetComponent<CameraComponent>();
+					auto& camera = cameraComponent.Camera;
+
+					out << YAML::Key << "Camera" << YAML::Value;
+					out << YAML::BeginMap;
+					out << YAML::Key << "ProjectionType" << YAML::Value << (int)camera.GetProjectionType();
+					out << YAML::Key << "PerspectiveFOV" << YAML::Value << camera.GetPerspectiveVerticalFOV();
+					out << YAML::Key << "PerspectiveNear" << YAML::Value << camera.GetPerspectiveNearClip();
+					out << YAML::Key << "PerspectiveFar" << YAML::Value << camera.GetPerspectiveFarClip();
+					out << YAML::Key << "OrthographicSize" << YAML::Value << camera.GetOrthographicSize();
+					out << YAML::Key << "OrthographicNear" << YAML::Value << camera.GetOrthographicNearClip();
+					out << YAML::Key << "OrthographicFar" << YAML::Value << camera.GetOrthographicFarClip();
+					out << YAML::EndMap;
+
+					out << YAML::Key << "Primary" << YAML::Value << cameraComponent.Primary;
+					out << YAML::Key << "FixedAspectRatio" << YAML::Value << cameraComponent.FixedAspectRatio;
+
+					out << YAML::EndMap;
+				}
+
+				// RIGIDBODY 2D COMPONENT
+				if (entity.HasComponent<Rigidbody2DComponent>())
+				{
+					out << YAML::Key << "Rigidbody2DComponent";
+					out << YAML::BeginMap;
+
+					auto& rb2dComponent = entity.GetComponent<Rigidbody2DComponent>();
+					out << YAML::Key << "BodyType" << YAML::Value << RigidBody2DBodyTypeToString(rb2dComponent.Type);
+					out << YAML::Key << "FixedRotation" << YAML::Value << rb2dComponent.FixedRotation;
+					out << YAML::Key << "GravityScale" << YAML::Value << rb2dComponent.GravityScale;
+					out << YAML::Key << "Mass" << YAML::Value << rb2dComponent.Mass;
+
+					out << YAML::EndMap;
+				}
+
+				// BOX COLLIDER 2D COMPONENT
+				if (entity.HasComponent<BoxCollider2DComponent>())
+				{
+					out << YAML::Key << "BoxCollider2DComponent";
+					out << YAML::BeginMap;
+
+					auto& bc2dComponent = entity.GetComponent<BoxCollider2DComponent>();
+					out << YAML::Key << "Offset" << YAML::Value << bc2dComponent.Offset;
+					out << YAML::Key << "Size" << YAML::Value << bc2dComponent.Size;
+					out << YAML::Key << "Density" << YAML::Value << bc2dComponent.Density;
+					out << YAML::Key << "Friction" << YAML::Value << bc2dComponent.Friction;
+					out << YAML::Key << "Restitution" << YAML::Value << bc2dComponent.Restitution;
+					out << YAML::Key << "RestitutionThreshold" << YAML::Value << bc2dComponent.RestitutionThreshold;
+					out << YAML::Key << "IsTrigger" << YAML::Value << bc2dComponent.IsTrigger;
+
+					out << YAML::EndMap;
+				}
+
+				// CIRCLE COLLIDER 2D COMPONENT
+				if (entity.HasComponent<CircleCollider2DComponent>())
+				{
+					out << YAML::Key << "CircleCollider2DComponent";
+					out << YAML::BeginMap;
+
+					auto& cc2dComponent = entity.GetComponent<CircleCollider2DComponent>();
+					out << YAML::Key << "Offset" << YAML::Value << cc2dComponent.Offset;
+					out << YAML::Key << "Radius" << YAML::Value << cc2dComponent.Radius;
+					out << YAML::Key << "Density" << YAML::Value << cc2dComponent.Density;
+					out << YAML::Key << "Friction" << YAML::Value << cc2dComponent.Friction;
+					out << YAML::Key << "Restitution" << YAML::Value << cc2dComponent.Restitution;
+					out << YAML::Key << "RestitutionThreshold" << YAML::Value << cc2dComponent.RestitutionThreshold;
+					out << YAML::Key << "IsTrigger" << YAML::Value << cc2dComponent.IsTrigger;
+
+					out << YAML::EndMap;
+				}
+
+				// MONOSCRIPT COMPONENT
+				if (entity.HasComponent<MonoScriptComponent>())
+				{
+					auto& scriptComponent = entity.GetComponent<MonoScriptComponent>();
+
+					out << YAML::Key << "ScriptComponent";
+					out << YAML::BeginMap;
+					out << YAML::Key << "ClassName" << YAML::Value << scriptComponent.ClassName;
+
+					// Fields
+					Ref<ScriptClass> entityClass = ScriptEngine::GetEntityClass(scriptComponent.ClassName);
+					const auto& fields = entityClass->GetFields();
+					if (fields.size() > 0)
+					{
+						out << YAML::Key << "ScriptFields" << YAML::Value;
+						auto& entityFields = ScriptEngine::GetScriptFieldMap(entity);
+						out << YAML::BeginSeq;
+						for (const auto& [name, field] : fields)
+						{
+							if (entityFields.find(name) == entityFields.end())
+								continue;
+
+							out << YAML::BeginMap;
+							out << YAML::Key << "Name" << YAML::Value << name;
+							out << YAML::Key << "Type" << YAML::Value << Utils::ScriptFieldTypeToString(field.Type);
+
+							out << YAML::Key << "Data" << YAML::Value;
+							ScriptFieldInstance& scriptField = entityFields.at(name);
+
+							switch (field.Type)
+							{
+								WRITE_SCRIPT_FIELD(Float, float);
+								WRITE_SCRIPT_FIELD(Double, double);
+								WRITE_SCRIPT_FIELD(Bool, bool);
+								WRITE_SCRIPT_FIELD(Char, char);
+								WRITE_SCRIPT_FIELD(Byte, int8_t);
+								WRITE_SCRIPT_FIELD(Short, int16_t);
+								WRITE_SCRIPT_FIELD(Int, int32_t);
+								WRITE_SCRIPT_FIELD(Long, int64_t);
+								WRITE_SCRIPT_FIELD(UByte, uint8_t);
+								WRITE_SCRIPT_FIELD(UShort, uint16_t);
+								WRITE_SCRIPT_FIELD(UInt, uint32_t);
+								WRITE_SCRIPT_FIELD(ULong, uint64_t);
+								WRITE_SCRIPT_FIELD(Vec2, glm::vec2);
+								WRITE_SCRIPT_FIELD(Vec3, glm::vec3);
+								WRITE_SCRIPT_FIELD(Vec4, glm::vec4);
+								WRITE_SCRIPT_FIELD(Entity, UUID);
+							}
+							out << YAML::EndMap;
+						}
+						out << YAML::EndSeq;
+					}
+
+					out << YAML::EndMap;
+				}
+
+				// SPRITE RENDERER COMPONENT
+				if (entity.HasComponent<SpriteRendererComponent>())
+				{
+					out << YAML::Key << "SpriteRendererComponent";
+					out << YAML::BeginMap;
+
+					auto& spriteRendererComponent = entity.GetComponent<SpriteRendererComponent>();
+					out << YAML::Key << "Color" << YAML::Value << spriteRendererComponent.Color;
+
+					if (spriteRendererComponent.Texture)
+					{
+						std::string sub = "Textures\\";
+						std::string path = spriteRendererComponent.Texture->GetPath();
+						size_t position = path.find(sub);
+
+						out << YAML::Key << "TexturePath" << YAML::Value << path.substr(position);
+					}
+
+					out << YAML::Key << "TilingFactor" << YAML::Value << spriteRendererComponent.TilingFactor;
+
+					out << YAML::EndMap;
+				}
+
+				// CIRCLE RENDERER COMPONENT
+				if (entity.HasComponent<CircleRendererComponent>())
+				{
+					out << YAML::Key << "CircleRendererComponent";
+					out << YAML::BeginMap;
+					auto& circleRendererComponent = entity.GetComponent<CircleRendererComponent>();
+					out << YAML::Key << "Color" << YAML::Value << circleRendererComponent.Color;
+					out << YAML::Key << "Thickness" << YAML::Value << circleRendererComponent.Thickness;
+					out << YAML::Key << "Fade" << YAML::Value << circleRendererComponent.Fade;
+					out << YAML::EndMap;
+				}
+
+				// TEXT COMPONENT
+				if (entity.HasComponent<TextComponent>())
+				{
+					out << YAML::Key << "TextComponent";
+					out << YAML::BeginMap; // TextComponent
+					auto& textComponent = entity.GetComponent<TextComponent>();
+					out << YAML::Key << "TextString" << YAML::Value << textComponent.TextString;
+					out << YAML::Key << "FontPath" << YAML::Value << textComponent.FontPath;
+					out << YAML::Key << "Color" << YAML::Value << textComponent.Color;
+					out << YAML::Key << "Kerning" << YAML::Value << textComponent.Kerning;
+					out << YAML::Key << "LineSpacing" << YAML::Value << textComponent.LineSpacing;
+					out << YAML::EndMap; // TextComponent
+				}
+
+				if (m_Scene->GetParent(entity.GetUUID()) != 0)
+				{
+					UUID parentID = m_Scene->GetEntityParentMap()[entity.GetUUID()];
+					out << YAML::Key << "Parent" << YAML::Value << parentID;
+				}
+
+				out << YAML::EndMap;
+
 			});
 		out << YAML::EndSeq;
 		out << YAML::EndMap;
 
 		std::ofstream fout(filepath);
 		fout << out.c_str();
+
+		CC_CORE_INFO("[SceneSerializer::Serialize] Scene saved!");
 	}
 
 	void SceneSerializer::SerializeRuntime(const std::string& filepath)
@@ -439,6 +450,8 @@ namespace Cataclysm
 		auto entities = data["Entities"];
 		if (entities)
 		{
+			std::vector<std::pair<UUID, UUID>> pendingParentLinks;
+
 			for (auto entity : entities)
 			{
 				uint64_t uuid = entity["Entity"].as<uint64_t>(); // TODO
@@ -451,6 +464,9 @@ namespace Cataclysm
 				// CC_CORE_TRACE("[SceneSerializer::Deserialize] Deserialized entity '{1}' ({0})", uuid, name);
 
 				Entity deserializedEntity = m_Scene->CreateEntityWithUUID(uuid, name);
+
+				auto& idComponent = deserializedEntity.GetComponent<IDComponent>();
+				idComponent.Enabled = entity["Enabled"].as<bool>();
 
 				auto transformComponent = entity["TransformComponent"];
 				if (transformComponent)
@@ -524,9 +540,9 @@ namespace Cataclysm
 									READ_SCRIPT_FIELD(UShort, uint16_t);
 									READ_SCRIPT_FIELD(UInt, uint32_t);
 									READ_SCRIPT_FIELD(ULong, uint64_t);
-									READ_SCRIPT_FIELD(Vector2, glm::vec2);
-									READ_SCRIPT_FIELD(Vector3, glm::vec3);
-									READ_SCRIPT_FIELD(Vector4, glm::vec4);
+									READ_SCRIPT_FIELD(Vec2, glm::vec2);
+									READ_SCRIPT_FIELD(Vec3, glm::vec3);
+									READ_SCRIPT_FIELD(Vec4, glm::vec4);
 									READ_SCRIPT_FIELD(Entity, UUID);
 								}
 							}
@@ -567,6 +583,8 @@ namespace Cataclysm
 					auto& rb2d = deserializedEntity.AddComponent<Rigidbody2DComponent>();
 					rb2d.Type = RigidBody2DBodyTypeFromString(rigidbody2DComponent["BodyType"].as<std::string>());
 					rb2d.FixedRotation = rigidbody2DComponent["FixedRotation"].as<bool>();
+					rb2d.GravityScale = rigidbody2DComponent["GravityScale"].as<float>();
+					rb2d.Mass = rigidbody2DComponent["Mass"].as<float>();
 				}
 
 				auto boxCollider2DComponent = entity["BoxCollider2DComponent"];
@@ -579,6 +597,7 @@ namespace Cataclysm
 					bc2d.Friction = boxCollider2DComponent["Friction"].as<float>();
 					bc2d.Restitution = boxCollider2DComponent["Restitution"].as<float>();
 					bc2d.RestitutionThreshold = boxCollider2DComponent["RestitutionThreshold"].as<float>();
+					bc2d.IsTrigger = boxCollider2DComponent["IsTrigger"].as<bool>();
 				}
 
 				auto circleCollider2DComponent = entity["CircleCollider2DComponent"];
@@ -591,6 +610,7 @@ namespace Cataclysm
 					cc2d.Friction = circleCollider2DComponent["Friction"].as<float>();
 					cc2d.Restitution = circleCollider2DComponent["Restitution"].as<float>();
 					cc2d.RestitutionThreshold = circleCollider2DComponent["RestitutionThreshold"].as<float>();
+					cc2d.IsTrigger = circleCollider2DComponent["IsTrigger"].as<bool>();
 				}
 
 				auto textComponent = entity["TextComponent"];
@@ -598,11 +618,28 @@ namespace Cataclysm
 				{
 					auto& tc = deserializedEntity.AddComponent<TextComponent>();
 					tc.TextString = textComponent["TextString"].as<std::string>();
-					// tc.FontAsset // TODO
 					tc.Color = textComponent["Color"].as<glm::vec4>();
 					tc.Kerning = textComponent["Kerning"].as<float>();
 					tc.LineSpacing = textComponent["LineSpacing"].as<float>();
+					tc.FontPath = textComponent["FontPath"].as<std::string>();
+					tc.FontAsset = Font::GetFont(tc.FontPath);
 				}
+
+				if (entity["Parent"])
+				{
+					UUID parentID = entity["Parent"].as<UUID>();
+					pendingParentLinks.push_back({ uuid, parentID });
+				}
+			}
+
+			for (auto& [childUUID, parentUUID] : pendingParentLinks)
+			{
+				m_Scene->SetParentOnLoad(childUUID, parentUUID);
+			}
+
+			for (auto& [child, parent] : m_Scene->GetEntityParentMap())
+			{
+				m_Scene->GetEntityChildrenMap().insert({ parent, child });
 			}
 		}
 

@@ -23,5 +23,7 @@
 			get => InternalCalls.SpriteRendererComponent_GetTilingFactor(Entity.ID);
 			set => InternalCalls.SpriteRendererComponent_SetTilingFactor(Entity.ID, value);
 		}
+
+		public void Reset() => InternalCalls.SpriteRendererComponent_Reset(Entity.ID);
 	}
 }

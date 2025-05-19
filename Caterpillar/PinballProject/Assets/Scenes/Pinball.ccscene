@@ -1,75 +1,210 @@
 Scene: New Scene
 Entities:
-  - Entity: 353966973971146685
+  - Entity: 13907297509037870459
+    Enabled: true
     TagComponent:
-      Tag: RightWall
+      Tag: Flipper
     TransformComponent:
-      Translation: [10, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [0.5, 20.5, 1]
+      Translation: [-1.35661316, 0.0570030212, -0.100000031]
+      Rotation: [0, -0, -9.9341058e-08]
+      Scale: [3.60000062, 1.20000029, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: Textures\flipper.png
+      TilingFactor: 1
+    Parent: 5297144237274371593
+  - Entity: 500071448277611600
+    Enabled: true
+    TagComponent:
+      Tag: Flipper
+    TransformComponent:
+      Translation: [-1.35661316, 0.0570030212, -0.100000031]
+      Rotation: [0, -0, -9.9341058e-08]
+      Scale: [3.60000062, 1.20000029, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: Textures\flipper.png
+      TilingFactor: 1
+    Parent: 5297144237274371593
+  - Entity: 5297144237274371593
+    Enabled: true
+    TagComponent:
+      Tag: Axle
+    TransformComponent:
+      Translation: [-6.6775856, -4.85408306, 0]
+      Rotation: [0, -0, 0.34906584]
+      Scale: [0.600000024, 0.600000024, 1]
+    Rigidbody2DComponent:
+      BodyType: Static
+      FixedRotation: false
+      GravityScale: 1
+      Mass: 1
+    BoxCollider2DComponent:
+      Offset: [-0.800000012, -0]
+      Size: [1.60000002, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0.5
+      RestitutionThreshold: 0.5
+      IsTrigger: false
+    ScriptComponent:
+      ClassName: Pinball.Trigger
+    CircleRendererComponent:
+      Color: [0.298039228, 0.298039228, 0.298039228, 1]
+      Thickness: 1
+      Fade: 0.00499999989
+  - Entity: 8548276426141316892
+    Enabled: true
+    TagComponent:
+      Tag: Flipper
+    TransformComponent:
+      Translation: [-1.35661316, 0.0570030212, -0.100000031]
+      Rotation: [0, -0, -9.9341058e-08]
+      Scale: [3.60000062, 1.20000029, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: Textures\flipper.png
+      TilingFactor: 1
+    Parent: 18136203274423097551
+  - Entity: 6354668258444641057
+    Enabled: true
+    TagComponent:
+      Tag: Gutter
+    TransformComponent:
+      Translation: [5.80000019, -8.10000038, 0]
+      Rotation: [0, 0, 0.427605659]
+      Scale: [-9, 0.400000006, 1]
     Rigidbody2DComponent:
       BodyType: Static
       FixedRotation: true
+      GravityScale: 1
+      Mass: 1
     BoxCollider2DComponent:
       Offset: [0, 0]
       Size: [0.5, 0.5]
       Density: 1
       Friction: 0.5
-      Restitution: 0.5
-      RestitutionThreshold: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0
+      IsTrigger: false
     SpriteRendererComponent:
-      Color: [0.297297299, 0.297297299, 0.297297299, 1]
+      Color: [0.298039228, 0.298039228, 0.298039228, 1]
       TilingFactor: 1
-  - Entity: 17529303376598209859
+  - Entity: 7517427810598405515
+    Enabled: true
     TagComponent:
-      Tag: LeftWall
+      Tag: Gutter
     TransformComponent:
-      Translation: [-10, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [0.5, 20.5, 1]
+      Translation: [-5.80000019, -8.10000038, 0]
+      Rotation: [0, 0, -0.427605659]
+      Scale: [9, 0.400000006, 1]
     Rigidbody2DComponent:
       BodyType: Static
       FixedRotation: true
+      GravityScale: 1
+      Mass: 1
     BoxCollider2DComponent:
       Offset: [0, 0]
       Size: [0.5, 0.5]
       Density: 1
       Friction: 0.5
-      Restitution: 0.5
-      RestitutionThreshold: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0
+      IsTrigger: false
     SpriteRendererComponent:
-      Color: [0.297297299, 0.297297299, 0.297297299, 1]
+      Color: [0.298039228, 0.298039228, 0.298039228, 1]
       TilingFactor: 1
-  - Entity: 3866199602426373913
+  - Entity: 18136203274423097551
+    Enabled: true
     TagComponent:
-      Tag: Floor
+      Tag: Axle
     TransformComponent:
-      Translation: [-1.1920929e-07, -10, 0]
-      Rotation: [0, 0, 0]
-      Scale: [20, 0.5, 1]
+      Translation: [-6.6775856, -4.85408306, 0]
+      Rotation: [0, -0, 0.34906584]
+      Scale: [0.600000024, 0.600000024, 1]
     Rigidbody2DComponent:
       BodyType: Static
-      FixedRotation: true
+      FixedRotation: false
+      GravityScale: 1
+      Mass: 1
     BoxCollider2DComponent:
-      Offset: [0, 0]
-      Size: [0.5, 0.5]
+      Offset: [-0.800000012, -0]
+      Size: [1.60000002, 0.5]
       Density: 1
       Friction: 0.5
       Restitution: 0.5
       RestitutionThreshold: 0.5
+      IsTrigger: false
+    ScriptComponent:
+      ClassName: Pinball.Trigger
+    CircleRendererComponent:
+      Color: [0.298039228, 0.298039228, 0.298039228, 1]
+      Thickness: 1
+      Fade: 0.00499999989
+  - Entity: 6067636544596750103
+    Enabled: true
+    TagComponent:
+      Tag: Flipper
+    TransformComponent:
+      Translation: [-1.1961596, 0.00178623199, -0.100000039]
+      Rotation: [0, -0, 0]
+      Scale: [3.60000038, 1.20000005, 1.00000012]
     SpriteRendererComponent:
-      Color: [0.297297299, 0.297297299, 0.297297299, 1]
+      Color: [1, 1, 1, 1]
+      TexturePath: Textures\flipper.png
       TilingFactor: 1
-  - Entity: 2189983126321953945
+    Parent: 6603410044836780957
+  - Entity: 4398601053746641898
+    Enabled: true
+    TagComponent:
+      Tag: Flipper
+    TransformComponent:
+      Translation: [-1.35661316, 0.0570030212, -0.100000031]
+      Rotation: [0, -0, -9.9341058e-08]
+      Scale: [3.60000062, 1.20000029, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: Textures\flipper.png
+      TilingFactor: 1
+    Parent: 18136203274423097551
+  - Entity: 8717733820942571577
+    Enabled: true
     TagComponent:
       Tag: Bumper
     TransformComponent:
-      Translation: [0, -3, 0]
-      Rotation: [0, 0, 0]
+      Translation: [-5.96340084, -0.038308382, 0]
+      Rotation: [0, -0, 0]
       Scale: [1, 1, 1]
     Rigidbody2DComponent:
       BodyType: Static
       FixedRotation: true
+      GravityScale: 1
+      Mass: 1
+    CircleCollider2DComponent:
+      Offset: [0, 0]
+      Radius: 0.5
+      Density: 1
+      Friction: 0.5
+      Restitution: 0.5
+      RestitutionThreshold: 0.5
+      IsTrigger: false
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: Textures\bumper.png
+      TilingFactor: 1
+  - Entity: 13337665471077211621
+    Enabled: true
+    TagComponent:
+      Tag: Bumper
+    TransformComponent:
+      Translation: [6.30483007, 0, 0]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    Rigidbody2DComponent:
+      BodyType: Static
+      FixedRotation: true
+      GravityScale: 1
+      Mass: 1
     CircleCollider2DComponent:
       Offset: [0, 0]
       Radius: 0.5
@@ -77,65 +212,13 @@ Entities:
       Friction: 0.5
       Restitution: 2
       RestitutionThreshold: 0.5
+      IsTrigger: false
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
       TexturePath: Textures\bumper.png
       TilingFactor: 1
-  - Entity: 17351343709445497634
-    TagComponent:
-      Tag: Camera
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    CameraComponent:
-      Camera:
-        ProjectionType: 1
-        PerspectiveFOV: 0.785398185
-        PerspectiveNear: 0.00999999978
-        PerspectiveFar: 1000
-        OrthographicSize: 25
-        OrthographicNear: -100
-        OrthographicFar: 100
-      Primary: true
-      FixedAspectRatio: false
-  - Entity: 17789283355836263863
-    TagComponent:
-      Tag: Ball
-    TransformComponent:
-      Translation: [-3.40067792, 6.63726139, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    Rigidbody2DComponent:
-      BodyType: Dynamic
-      FixedRotation: false
-    CircleCollider2DComponent:
-      Offset: [0, 0]
-      Radius: 0.5
-      Density: 1
-      Friction: 0.5
-      Restitution: 0
-      RestitutionThreshold: 0.5
-    ScriptComponent:
-      ClassName: Pinball.Ball
-      ScriptFields:
-        []
-    SpriteRendererComponent:
-      Color: [1, 1, 1, 1]
-      TexturePath: Textures\ball.png
-      TilingFactor: 1
-  - Entity: 1525888513030654200
-    TagComponent:
-      Tag: Logo
-    TransformComponent:
-      Translation: [0, 0, -0.00100000005]
-      Rotation: [0, 0, 0]
-      Scale: [10, 10, 1]
-    SpriteRendererComponent:
-      Color: [0.154440165, 0.154440165, 0.154440165, 1]
-      TexturePath: Textures\CataclysmLogo.png
-      TilingFactor: 1
   - Entity: 14193544615267237608
+    Enabled: true
     TagComponent:
       Tag: Ceiling
     TransformComponent:
@@ -145,6 +228,8 @@ Entities:
     Rigidbody2DComponent:
       BodyType: Static
       FixedRotation: true
+      GravityScale: 1
+      Mass: 1
     BoxCollider2DComponent:
       Offset: [0, 0]
       Size: [0.5, 0.5]
@@ -152,19 +237,54 @@ Entities:
       Friction: 0.5
       Restitution: 0.5
       RestitutionThreshold: 0.5
+      IsTrigger: false
     SpriteRendererComponent:
       Color: [0.297297299, 0.297297299, 0.297297299, 1]
       TilingFactor: 1
-  - Entity: 13337665471077211621
+  - Entity: 1525888513030654200
+    Enabled: true
+    TagComponent:
+      Tag: Logo
+    TransformComponent:
+      Translation: [0, 0, -1]
+      Rotation: [0, -0, 0]
+      Scale: [10, 10, 1]
+    SpriteRendererComponent:
+      Color: [0.158301175, 0.158301175, 0.158301175, 1]
+      TexturePath: Textures\CataclysmLogo.png
+      TilingFactor: 1
+  - Entity: 932294131855897611
+    Enabled: true
+    TagComponent:
+      Tag: Camera
+    TransformComponent:
+      Translation: [0, 0, 5.72247267]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 1
+        PerspectiveFOV: 1.74532926
+        PerspectiveNear: -1000
+        PerspectiveFar: 1000
+        OrthographicSize: 25
+        OrthographicNear: -100
+        OrthographicFar: 100
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 2189983126321953945
+    Enabled: true
     TagComponent:
       Tag: Bumper
     TransformComponent:
-      Translation: [4, 0, 0]
-      Rotation: [0, 0, 0]
+      Translation: [6.40230656, -3.34145331, 0]
+      Rotation: [0, -0, 0]
       Scale: [1, 1, 1]
     Rigidbody2DComponent:
       BodyType: Static
       FixedRotation: true
+      GravityScale: 1
+      Mass: 1
     CircleCollider2DComponent:
       Offset: [0, 0]
       Radius: 0.5
@@ -172,28 +292,160 @@ Entities:
       Friction: 0.5
       Restitution: 2
       RestitutionThreshold: 0.5
+      IsTrigger: false
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
       TexturePath: Textures\bumper.png
       TilingFactor: 1
-  - Entity: 8717733820942571577
+  - Entity: 3866199602426373913
+    Enabled: true
     TagComponent:
-      Tag: Bumper
+      Tag: Floor
     TransformComponent:
-      Translation: [-4, -0.038308382, 0]
+      Translation: [-1.1920929e-07, -10, 0]
       Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
+      Scale: [20, 0.5, 1]
     Rigidbody2DComponent:
       BodyType: Static
       FixedRotation: true
+      GravityScale: 1
+      Mass: 1
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0.5
+      RestitutionThreshold: 0.5
+      IsTrigger: false
+    SpriteRendererComponent:
+      Color: [0.297297299, 0.297297299, 0.297297299, 1]
+      TilingFactor: 1
+  - Entity: 17529303376598209859
+    Enabled: true
+    TagComponent:
+      Tag: LeftWall
+    TransformComponent:
+      Translation: [-10, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [0.5, 20.5, 1]
+    Rigidbody2DComponent:
+      BodyType: Static
+      FixedRotation: true
+      GravityScale: 1
+      Mass: 1
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0.5
+      RestitutionThreshold: 0.5
+      IsTrigger: false
+    SpriteRendererComponent:
+      Color: [0.297297299, 0.297297299, 0.297297299, 1]
+      TilingFactor: 1
+  - Entity: 353966973971146685
+    Enabled: true
+    TagComponent:
+      Tag: RightWall
+    TransformComponent:
+      Translation: [10, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [0.5, 20.5, 1]
+    Rigidbody2DComponent:
+      BodyType: Static
+      FixedRotation: true
+      GravityScale: 1
+      Mass: 1
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0.5
+      RestitutionThreshold: 0.5
+      IsTrigger: false
+    SpriteRendererComponent:
+      Color: [0.297297299, 0.297297299, 0.297297299, 1]
+      TilingFactor: 1
+  - Entity: 16162957534506104422
+    Enabled: true
+    TagComponent:
+      Tag: Ball
+    TransformComponent:
+      Translation: [0.952617407, 5.11188602, 0]
+      Rotation: [0, -0, -2.87351561]
+      Scale: [0.999968767, 0.999968767, 0.999687672]
+    Rigidbody2DComponent:
+      BodyType: Dynamic
+      FixedRotation: false
+      GravityScale: 1
+      Mass: 1
     CircleCollider2DComponent:
       Offset: [0, 0]
       Radius: 0.5
       Density: 1
       Friction: 0.5
-      Restitution: 2
+      Restitution: 0.5
       RestitutionThreshold: 0.5
+      IsTrigger: false
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      TexturePath: Textures\bumper.png
+      TexturePath: Textures\ball.png
       TilingFactor: 1
+  - Entity: 6603410044836780957
+    Enabled: true
+    TagComponent:
+      Tag: Axle
+    TransformComponent:
+      Translation: [-1.31797171, 6.38945007, 0.100000001]
+      Rotation: [0, -0, -3.14133358]
+      Scale: [0.599999964, 0.599999964, 0.999659598]
+    Rigidbody2DComponent:
+      BodyType: Dynamic
+      FixedRotation: false
+      GravityScale: 1
+      Mass: 336
+    BoxCollider2DComponent:
+      Offset: [-0.800000012, 0]
+      Size: [1.60000002, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0.5
+      RestitutionThreshold: 0.5
+      IsTrigger: false
+    ScriptComponent:
+      ClassName: Pinball.Trigger
+    CircleRendererComponent:
+      Color: [0.298039228, 0.298039228, 0.298039228, 1]
+      Thickness: 1
+      Fade: 0.00499999989
+  - Entity: 12226502107490795254
+    Enabled: true
+    TagComponent:
+      Tag: Text1
+    TransformComponent:
+      Translation: [-7.04906178, 6.63737535, 0]
+      Rotation: [0, -0, 0]
+      Scale: [2, 2, 1]
+    TextComponent:
+      TextString: Text1
+      FontPath: S:\repos\c++\Cataclysm\Caterpillar\PinballProject\Assets\Fonts\Aboreto-Regular.ttf
+      Color: [1, 1, 1, 1]
+      Kerning: 0
+      LineSpacing: 0
+  - Entity: 11338262686524137699
+    Enabled: true
+    TagComponent:
+      Tag: Text2
+    TransformComponent:
+      Translation: [4.16769409, 6.53447104, 0]
+      Rotation: [0, -0, 0]
+      Scale: [2, 2, 1]
+    TextComponent:
+      TextString: Text2
+      FontPath: S:\repos\c++\Cataclysm\Caterpillar\PinballProject\Assets\Fonts\Aladin-Regular.ttf
+      Color: [1, 1, 1, 1]
+      Kerning: 0
+      LineSpacing: 0

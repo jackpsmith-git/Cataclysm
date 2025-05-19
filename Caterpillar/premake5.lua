@@ -7,6 +7,7 @@ project "Caterpillar"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("obj/" .. outputdir .. "/%{prj.name}")
+	icon ("%{wks.location}/Resources/CataclysmIcon.ico")
 
 	files
 	{

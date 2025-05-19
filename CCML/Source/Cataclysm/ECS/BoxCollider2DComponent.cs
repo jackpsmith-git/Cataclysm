@@ -72,5 +72,13 @@
 			get => InternalCalls.BoxCollider2DComponent_GetRestitutionThreshold(Entity.ID);
 			set => InternalCalls.BoxCollider2DComponent_SetRestitutionThreshold(Entity.ID, value);
 		}
+
+		public bool IsTrigger
+		{
+			get => InternalCalls.BoxCollider2DComponent_GetIsTrigger(Entity.ID);
+			set => InternalCalls.BoxCollider2DComponent_SetIsTrigger(Entity.ID, value);
+		}
+
+		public void Reset() => InternalCalls.BoxCollider2DComponent_Reset(Entity.ID);
 	}
 }

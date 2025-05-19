@@ -10,6 +10,12 @@ namespace Cataclysm
 		internal extern static void Entity_InstantiateEmpty(string name, out ulong entityID);
 
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void Entity_InstantiateEmptyAsChild(string name, ulong parentID, out ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void Entity_Destroy(ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static bool Entity_HasComponent(ulong entityID, Type componentType);
 
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
@@ -44,6 +50,36 @@ namespace Cataclysm
 
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
 		internal extern static void Entity_AddTextComponent(ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void Entity_RemoveBoxCollider2DComponent(ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void Entity_RemoveCameraComponent(ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void Entity_RemoveCircleCollider2DComponent(ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void Entity_RemoveCircleRendererComponent(ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void Entity_RemoveSpriteRendererComponent(ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void Entity_RemoveTextComponent(ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void Entity_SetParent(ulong entityID, ulong parentID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void Entity_RemoveParent(ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void Entity_GetParent(ulong entityID, out ulong parentID);
+
+		//[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		//internal extern static void Entity_GetChildren(ulong entityID, out ulong[] children);
 		#endregion
 
 		#region TransformComponent
@@ -64,6 +100,71 @@ namespace Cataclysm
 
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
 		internal extern static void TransformComponent_SetScale(ulong entityID, ref Vec3 scale);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void TransformComponent_GetGlobalTranslation(ulong entityID, out Vec3 translation);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void TransformComponent_GetGlobalRotation(ulong entityID, out Vec3 rotation);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void TransformComponent_GetGlobalScale(ulong entityID, out Vec3 scale);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void TransformComponent_Reset(ulong entityID);
+		#endregion
+
+		#region CameraComponent
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static bool CameraComponent_GetPrimary(ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void CameraComponent_SetPrimary(ulong entityID, bool primary);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static bool CameraComponent_GetFixedAspectRatio(ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void CameraComponent_SetFixedAspectRatio(ulong entityID, bool fixedAspectRatio);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static float CameraComponent_GetOrthograpicSize(ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void CameraComponent_SetOrthographicSize(ulong entityID, float size);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static float CameraComponent_GetOrthographicNearClip(ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void CameraComponent_SetOrthographicNearClip(ulong entityID, float clip);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static float CameraComponent_GetOrthographicFarClip(ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void CameraComponent_SetOrthographicFarClip(ulong entityID, float clip);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static float CameraComponent_GetPerspectiveNearClip(ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void CameraComponent_SetPerspectiveNearClip(ulong entityID, float clip);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static float CameraComponent_GetPerspectiveFarClip(ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void CameraComponent_SetPerspectiveFarClip(ulong entityID, float clip);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static float CameraComponent_GetPerspectiveVerticalFOV(ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void CameraComponent_SetPerspectiveVerticalFOV(ulong entityID, float fov);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void CameraComponent_Reset(ulong entityID);
 		#endregion
 
 		#region Rigidbody2DComponent
@@ -84,6 +185,33 @@ namespace Cataclysm
 
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static void Rigidbody2DComponent_ApplyLinearImpulseToCenter(ulong entityID, ref Vec2 impulse, bool wake);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void Rigidbody2DComponent_ApplyForce(ulong entityID, ref Vec2 force, ref Vec2 point, bool wake);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void Rigidbody2DComponent_ApplyForceToCenter(ulong entityID, ref Vec2 force, bool wake);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void Rigidbody2DComponent_ApplyTorque(ulong entityID, float torque, bool wake);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void Rigidbody2DComponent_ApplyAngularImpulse(ulong entityID, float impulse, bool wake);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static float Rigidbody2DComponent_GetGravityScale(ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void Rigidbody2DComponent_SetGravityScale(ulong entityID, float gravityScale);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static float Rigidbody2DComponent_GetMass(ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void Rigidbody2DComponent_SetMass(ulong entityID, float mass);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void Rigidbody2DComponent_Reset(ulong entityID);
 		#endregion
 
 		#region Input
@@ -121,6 +249,9 @@ namespace Cataclysm
 		
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
 		internal extern static void TextComponent_SetLineSpacing(ulong entityID, float lineSpacing);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void TextComponent_Reset(ulong entityID);
 		#endregion
 
 		#region Logger
@@ -149,6 +280,9 @@ namespace Cataclysm
 
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
 		internal extern static void SpriteRendererComponent_SetTilingFactor(ulong entityID, float tilingFactor);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void SpriteRendererComponent_Reset(ulong entityID);
 		#endregion
 
 		#region CircleRendererComponent
@@ -169,6 +303,9 @@ namespace Cataclysm
 
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
 		internal extern static void CircleRendererComponent_SetFade(ulong entityID, float fade);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void CircleRendererComponent_Reset(ulong entityID);
 		#endregion
 
 		#region BoxCollider2DComponent
@@ -207,6 +344,15 @@ namespace Cataclysm
 
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
 		internal extern static void BoxCollider2DComponent_SetRestitutionThreshold(ulong entityID, float restitutionThreshold);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static bool BoxCollider2DComponent_GetIsTrigger(ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void BoxCollider2DComponent_SetIsTrigger(ulong entityID, bool isTrigger);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void BoxCollider2DComponent_Reset(ulong entityID);
 		#endregion
 
 		#region CircleCollider2DComponent
@@ -245,6 +391,15 @@ namespace Cataclysm
 
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
 		internal extern static void CircleCollider2DComponent_SetRestitutionThreshold(ulong entityID, float restitutionThreshold);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static bool CircleCollider2DComponent_GetIsTrigger(ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void CircleCollider2DComponent_SetIsTrigger(ulong entityID, bool isTrigger);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void CircleCollider2DComponent_Reset(ulong entityID);
 		#endregion
 	}
 }
