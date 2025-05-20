@@ -9,6 +9,8 @@
 #include "mono/metadata/tabledefs.h"
 #include "mono/metadata/mono-debug.h"
 #include "mono/metadata/threads.h"
+#include "mono/metadata/metadata.h"
+#include "mono/metadata/debug-helpers.h"
 
 #include "filewatch.h"
 
@@ -33,6 +35,7 @@ namespace Cataclysm
 		{ "System.UInt16",		ScriptFieldType::UShort },
 		{ "System.UInt32",		ScriptFieldType::UInt },
 		{ "System.UInt64",		ScriptFieldType::ULong },
+		{ "System.String",		ScriptFieldType::String },
 
 		{ "Cataclysm.Vec2",		ScriptFieldType::Vec2 },
 		{ "Cataclysm.Vec3",		ScriptFieldType::Vec3 },
@@ -664,6 +667,25 @@ namespace Cataclysm
 		}
 	}
 
+	std::string ScriptInstance::GetFieldValueString(const std::string& name)
+	{
+		auto field = m_ScriptClass->GetField(name);
+		MonoString* monoStr = nullptr;
+		mono_field_get_value(m_Instance, field.ClassField, &monoStr);
+		if (!monoStr) return "";
+		char* utf8 = mono_string_to_utf8(monoStr);
+		std::string result(utf8);
+		mono_free(utf8);
+		return result;
+	}
+
+	void ScriptInstance::SetFieldValueString(const std::string& name, const std::string& value)
+	{
+		auto field = m_ScriptClass->GetField(name);
+		MonoString* monoStr = mono_string_new(mono_domain_get(), value.c_str());
+		mono_field_set_value(m_Instance, field.ClassField, monoStr);
+	}
+
 	bool ScriptInstance::GetFieldValueInternal(const std::string& name, void* buffer)
 	{
 		const auto& fields = m_ScriptClass->GetFields();
@@ -672,8 +694,51 @@ namespace Cataclysm
 			return false;
 
 		const ScriptField& field = it->second;
+
+		if (field.Type == ScriptFieldType::Entity)
+		{
+			MonoObject* object = nullptr;
+			mono_field_get_value(m_Instance, field.ClassField, &object);
+
+			if (object)
+			{
+				MonoClass* monoClass = mono_object_get_class(object);
+				MonoProperty* idProp = mono_class_get_property_from_name(monoClass, "ID");
+				if (idProp)
+				{
+					MonoObject* result = mono_property_get_value(idProp, object, nullptr, nullptr);
+					if (result)
+					{
+						*(uint64_t*)buffer = *(uint64_t*)mono_object_unbox(result);
+						return true;
+					}
+				}
+			}
+
+			*(uint64_t*)buffer = 0;
+			return true;
+		}
+
 		mono_field_get_value(m_Instance, field.ClassField, buffer);
+
 		return true;
+	}
+
+	static MonoMethod* s_EntityCreateMethod = nullptr;
+
+	MonoMethod* ScriptEngine::GetEntityCreateMethod()
+	{
+		if (s_EntityCreateMethod)
+			return s_EntityCreateMethod;
+
+		MonoMethodDesc* desc = mono_method_desc_new("Cataclysm.Entity:CreateInternal(ulong)", true);
+		s_EntityCreateMethod = mono_method_desc_search_in_image(desc, GetCoreAssemblyImage());
+		mono_method_desc_free(desc);
+
+		if (!s_EntityCreateMethod)
+			CC_CORE_ERROR("Could not find Cataclysm.Entity.CreateInternal(ulong)");
+
+		return s_EntityCreateMethod;
 	}
 
 	bool ScriptInstance::SetFieldValueInternal(const std::string& name, const void* value)
@@ -684,7 +749,37 @@ namespace Cataclysm
 			return false;
 
 		const ScriptField& field = it->second;
-		mono_field_set_value(m_Instance, field.ClassField, (void*)value);
+
+		if (field.Type == ScriptFieldType::Entity)
+		{
+			uint64_t entityID = *(const uint64_t*)value;
+
+			// Call Cataclysm.Entity.CreateInternal(ulong)
+			MonoMethod* createMethod = ScriptEngine::GetEntityCreateMethod(); // cache this!
+			if (!createMethod)
+			{
+				CC_CORE_ERROR("Failed to find Entity.CreateInternal(ulong) method");
+				return false;
+			}
+
+			void* args[1] = { &entityID };
+			MonoObject* entityObject = mono_runtime_invoke(createMethod, nullptr, args, nullptr);
+
+			if (!entityObject)
+			{
+				CC_CORE_ERROR("mono_runtime_invoke returned null for Entity.CreateInternal");
+				return false;
+			}
+
+			// Set the resulting object on the field
+			mono_field_set_value(m_Instance, field.ClassField, entityObject);
+			return true;
+		}
+		else
+		{
+			mono_field_set_value(m_Instance, field.ClassField, (void*)value);
+		}
+
 		return true;
 	}
 }

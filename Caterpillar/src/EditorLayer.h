@@ -8,6 +8,8 @@
 #include "Panels/GamePanel.h"
 #include "Panels/DocumentationPanel.h"
 #include "Panels/ProfilerPanel.h"
+#include "Panels/WelcomePanel.h"
+#include "Panels/SettingsPanel.h"
 
 #include "Cataclysm/Renderer/EditorCamera.h"
 
@@ -94,6 +96,8 @@ namespace Cataclysm
 		bool m_ShowVesuviusPanel = true;
 		bool m_ShowFrameDebuggerPanel = true;
 		bool m_ShowProfilerPanel = false;
+		bool m_ShowWelcomePanel = true;
+		bool m_ShowSettingsPanel = false;
 
 		enum class SceneState
 		{
@@ -109,6 +113,8 @@ namespace Cataclysm
 		Scope<GamePanel> m_GamePanel;
 		Scope<DocumentationPanel> m_DocumentationPanel;
 		Scope<ProfilerPanel> m_ProfilerPanel;
+		Scope<WelcomePanel> m_WelcomePanel;
+		Scope<SettingsPanel> m_SettingsPanel;
 
 		Cataclysm::Ref<Cataclysm::Texture2D> m_IconPlay, m_IconPause, m_IconStep, m_IconSimulate, m_IconStop, 
 			m_IconShowPhysicsColliders, m_IconTranslate, m_IconRotate, m_IconScale, 

@@ -31,6 +31,9 @@ namespace Cataclysm
 		internal extern static object GetScriptInstance(ulong entityID);
 
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void Entity_AddAudioSourceComponent(ulong EntityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
 		internal extern static void Entity_AddBoxCollider2DComponent(ulong entityID);
 
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
@@ -50,6 +53,9 @@ namespace Cataclysm
 
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
 		internal extern static void Entity_AddTextComponent(ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void Entity_RemoveAudioSourceComponent(ulong entityID);
 
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
 		internal extern static void Entity_RemoveBoxCollider2DComponent(ulong entityID);
@@ -80,6 +86,17 @@ namespace Cataclysm
 
 		//[MethodImplAttribute(MethodImplOptions.InternalCall)]
 		//internal extern static void Entity_GetChildren(ulong entityID, out ulong[] children);
+		#endregion
+
+		#region AudioSourceComponent
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void AudioSourceComponent_Play(ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void AudioSourceComponent_Pause(ulong entityID);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void AudioSourceComponent_Stop(ulong entityID);
 		#endregion
 
 		#region TransformComponent

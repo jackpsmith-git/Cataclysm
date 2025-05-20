@@ -6,6 +6,7 @@
 #include "Cataclysm/Input/KeyCodes.h"
 #include "Cataclysm/Input/Input.h"
 #include "Cataclysm/Math/Math.h"
+#include "Cataclysm/Audio/AudioEngine.h"
 
 #include "Cataclysm/ECS/Entity.h"
 #include "Cataclysm/Scene/Scene.h"
@@ -139,6 +140,17 @@ namespace Cataclysm
 			entity.AddComponent<CameraComponent>();
 	}
 
+	static void Entity_AddAudioSourceComponent(UUID entityID)
+	{
+		Scene* scene = ScriptEngine::GetSceneContext();
+		CC_CORE_ASSERT(scene, "Scene not found!");
+		Entity entity = scene->GetEntityByUUID(entityID);
+		CC_CORE_ASSERT(entity, "Entity not found!");
+
+		if (!entity.HasComponent<AudioSourceComponent>())
+			entity.AddComponent<AudioSourceComponent>();
+	}
+
 	static void Entity_AddCircleCollider2DComponent(UUID entityID)
 	{
 		Scene* scene = ScriptEngine::GetSceneContext();
@@ -192,6 +204,17 @@ namespace Cataclysm
 
 		if (!entity.HasComponent<TextComponent>())
 			entity.AddComponent<TextComponent>();
+	}
+
+	static void Entity_RemoveAudioSourceComponent(UUID entityID)
+	{
+		Scene* scene = ScriptEngine::GetSceneContext();
+		CC_CORE_ASSERT(scene, "Scene not found!");
+		Entity entity = scene->GetEntityByUUID(entityID);
+		CC_CORE_ASSERT(entity, "Entity not found!");
+
+		if (entity.HasComponent<AudioSourceComponent>())
+			entity.RemoveComponent<AudioSourceComponent>();
 	}
 
 	static void Entity_RemoveBoxCollider2DComponent(UUID entityID)
@@ -334,6 +357,50 @@ namespace Cataclysm
 	//
 	//	*outChildren = scene->GetChildren(entityID);
 	//}
+
+
+	///////////////////////////////////////////
+	//////////////// AUDIOSOURCE //////////////
+	///////////////////////////////////////////
+
+	static void AudioSourceComponent_Play(UUID entityID)
+	{
+		Scene* scene = ScriptEngine::GetSceneContext();
+		CC_CORE_ASSERT(scene, "Scene does not exist!");
+		Entity entity = scene->GetEntityByUUID(entityID);
+		CC_CORE_ASSERT(entity, "Entity does not exist!");
+		CC_CORE_ASSERT(entity.HasComponent<AudioSourceComponent>(), "Entity does not have AudioSourceComponent!");
+
+		auto& asc = entity.GetComponent<AudioSourceComponent>();
+		AudioEngine::Play(asc.AudioClip);
+		asc.IsPlaying = true;
+	}
+
+	static void AudioSourceComponent_Pause(UUID entityID)
+	{
+		Scene* scene = ScriptEngine::GetSceneContext();
+		CC_CORE_ASSERT(scene, "Scene does not exist!");
+		Entity entity = scene->GetEntityByUUID(entityID);
+		CC_CORE_ASSERT(entity, "Entity does not exist!");
+		CC_CORE_ASSERT(entity.HasComponent<AudioSourceComponent>(), "Entity does not have AudioSourceComponent!");
+
+		auto& asc = entity.GetComponent<AudioSourceComponent>();
+		AudioEngine::Pause(asc.AudioClip);
+		asc.IsPlaying = false;
+	}
+
+	static void AudioSourceComponent_Stop(UUID entityID)
+	{
+		Scene* scene = ScriptEngine::GetSceneContext();
+		CC_CORE_ASSERT(scene, "Scene does not exist!");
+		Entity entity = scene->GetEntityByUUID(entityID);
+		CC_CORE_ASSERT(entity, "Entity does not exist!");
+		CC_CORE_ASSERT(entity.HasComponent<AudioSourceComponent>(), "Entity does not have AudioSourceComponent!");
+
+		auto& asc = entity.GetComponent<AudioSourceComponent>();
+		AudioEngine::Stop(asc.AudioClip);
+		asc.IsPlaying = false;
+	}
 
 
 	///////////////////////////////////////////
@@ -1480,6 +1547,7 @@ namespace Cataclysm
 		CC_ADD_INTERNAL_CALL(Entity_GetParent);
 		CC_ADD_INTERNAL_CALL(Entity_RemoveParent);
 
+		CC_ADD_INTERNAL_CALL(Entity_AddAudioSourceComponent);
 		CC_ADD_INTERNAL_CALL(Entity_AddBoxCollider2DComponent);
 		CC_ADD_INTERNAL_CALL(Entity_AddCameraComponent);
 		CC_ADD_INTERNAL_CALL(Entity_AddCircleCollider2DComponent);
@@ -1488,6 +1556,7 @@ namespace Cataclysm
 		CC_ADD_INTERNAL_CALL(Entity_AddSpriteRendererComponent);
 		CC_ADD_INTERNAL_CALL(Entity_AddTextComponent);
 
+		CC_ADD_INTERNAL_CALL(Entity_RemoveAudioSourceComponent);
 		CC_ADD_INTERNAL_CALL(Entity_RemoveBoxCollider2DComponent);
 		CC_ADD_INTERNAL_CALL(Entity_RemoveCameraComponent);
 		CC_ADD_INTERNAL_CALL(Entity_RemoveCircleCollider2DComponent);
@@ -1496,6 +1565,10 @@ namespace Cataclysm
 		CC_ADD_INTERNAL_CALL(Entity_RemoveTextComponent);
 
 		//CC_ADD_INTERNAL_CALL(Entity_GetChildren);
+
+		CC_ADD_INTERNAL_CALL(AudioSourceComponent_Play);
+		CC_ADD_INTERNAL_CALL(AudioSourceComponent_Pause);
+		CC_ADD_INTERNAL_CALL(AudioSourceComponent_Stop);
 
 		CC_ADD_INTERNAL_CALL(TransformComponent_GetTranslation);
 		CC_ADD_INTERNAL_CALL(TransformComponent_SetTranslation);

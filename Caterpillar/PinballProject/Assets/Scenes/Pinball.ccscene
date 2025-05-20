@@ -1,5 +1,13 @@
 Scene: New Scene
 Entities:
+  - Entity: 17540972803244743890
+    Enabled: true
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
   - Entity: 13907297509037870459
     Enabled: true
     TagComponent:
@@ -374,9 +382,9 @@ Entities:
     TagComponent:
       Tag: Ball
     TransformComponent:
-      Translation: [0.952617407, 5.11188602, 0]
+      Translation: [0.952617407, 5.11188555, -7.4505806e-09]
       Rotation: [0, -0, -2.87351561]
-      Scale: [0.999968767, 0.999968767, 0.999687672]
+      Scale: [0.999968708, 0.999968708, 0.999687731]
     Rigidbody2DComponent:
       BodyType: Dynamic
       FixedRotation: false
@@ -449,3 +457,16 @@ Entities:
       Color: [1, 1, 1, 1]
       Kerning: 0
       LineSpacing: 0
+  - Entity: 15433276353915240549
+    Enabled: true
+    TagComponent:
+      Tag: AudioSource
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    AudioSourceComponent:
+      FilePath: S:\repos\c++\Cataclysm\Caterpillar\PinballProject\Assets\Audio\Shooting Star.wav
+      Loop: false
+      PlayOnStart: true
+      Volume: 0.430000007

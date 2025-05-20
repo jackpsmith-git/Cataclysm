@@ -53,6 +53,16 @@ namespace Cataclysm
 			return *(T*)m_Buffer;
 		}
 
+		std::string GetValueString()
+		{
+			return *(std::string*)m_Buffer;
+		}
+
+		void SetValueString(std::string value)
+		{
+			new (m_Buffer) std::string(std::move(value));
+		}
+
 		template<typename T>
 		void SetValue(T value)
 		{
@@ -126,6 +136,9 @@ namespace Cataclysm
 			return *(T*)s_FieldValueBuffer;
 		}
 
+		std::string GetFieldValueString(const std::string& name);
+		void SetFieldValueString(const std::string& name, const std::string& value);
+
 		template<typename T>
 		void SetFieldValue(const std::string& name, T value)
 		{
@@ -188,6 +201,8 @@ namespace Cataclysm
 		static MonoObject* ScriptEngine::CreateEntityInstance(Entity entity);
 
 		static void OnScriptComponentDestroyed(Entity entity);
+
+		static MonoMethod* ScriptEngine::GetEntityCreateMethod();
 	private:
 		static void InitMono();
 		static void ShutdownMono();

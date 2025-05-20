@@ -3,6 +3,7 @@
 
 #include <Cataclysm.h>
 #include "Cataclysm/Project/Project.h"
+#include "Cataclysm/Audio/AudioEngine.h"
 
 #include <imgui/imgui.h>
 #include <Windows.h>
@@ -15,12 +16,21 @@ namespace Cataclysm
 	static const double doubleClickThreshold = 0.3;
 
 	static std::unordered_map <std::string, Ref<Texture2D>> s_ThumbnailCache;
+	static std::unordered_map <std::string, Ref<Texture2D>> s_AudioPreviewCache;
 
 	BrowserPanel::BrowserPanel()
 		: m_BaseDirectory(Project::GetAssetDirectory()), m_CurrentDirectory(m_BaseDirectory)
 	{
 		m_DirectoryIcon = Cataclysm::Texture2D::Create("Resources/Icons/Browser/DirectoryIcon.png");
 		m_FileIcon = Cataclysm::Texture2D::Create("Resources/Icons/Browser/FileIcon.png");
+		m_AudioFileIcon = Cataclysm::Texture2D::Create("Resources/Icons/Browser/AudioFileIcon.png");
+	}
+
+	static bool IsAudioFile(const std::filesystem::path& path)
+	{
+		std::string ext = path.extension().string();
+		std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+		return (ext == ".wav" || ext == ".ogg" || ext == ".mp3");
 	}
 
 	static bool IsTextureFile(const std::filesystem::path& path)
@@ -189,6 +199,10 @@ namespace Cataclysm
 					icon = atlasTexture;
 				}
 			}
+			else if (IsAudioFile(path))
+			{
+				icon = m_AudioFileIcon;
+			}
 			
 			
 			if (ImGui::ImageButton((ImTextureID)icon->GetRendererID(), { renderedThumbnailSize, renderedThumbnailSize }, { 0, 1 }, { 1, 0 }))
@@ -219,6 +233,8 @@ namespace Cataclysm
 				std::filesystem::path relativePath(path);
 				const wchar_t* itemPath = relativePath.c_str();
 				ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
+				ImGui::Image((ImTextureID)icon->GetRendererID(), ImVec2(20, 20), { 0, 1 }, { 1, 0 });
+				ImGui::SameLine();
 				ImGui::Text(filenameString.c_str());
 				ImGui::EndDragDropSource();
 			}

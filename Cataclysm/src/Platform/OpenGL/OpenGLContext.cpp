@@ -15,8 +15,6 @@ namespace Cataclysm
 
 	void OpenGLContext::Init()
 	{
-		CC_PROFILE_FUNCTION();
-
 		glfwMakeContextCurrent(m_WindowHandle);
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		CC_CORE_ASSERT(status, "Failed to initialize Glad!");
@@ -33,8 +31,6 @@ namespace Cataclysm
 
 	void OpenGLContext::SwapBuffers()
 	{
-		CC_PROFILE_FUNCTION();
-
 		glfwSwapBuffers(m_WindowHandle);
 	}
 }

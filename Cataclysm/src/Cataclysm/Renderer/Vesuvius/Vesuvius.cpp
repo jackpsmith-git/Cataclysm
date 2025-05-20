@@ -231,8 +231,6 @@ namespace Cataclysm
 
 	void Vesuvius::DrawQuad(const glm::mat4& transform, const glm::vec4& color, const Ref<Texture2D> texture, float tilingFactor, int entityID)
 	{
-		CC_PROFILE_FUNCTION();
-
 		constexpr size_t quadVertexCount = 4;
 		// constexpr glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		constexpr glm::vec2 textureCoords[] = {
@@ -280,8 +278,6 @@ namespace Cataclysm
 
 	void Vesuvius::DrawQuad(const glm::mat4& transform, const glm::vec4& color, int entityID)
 	{
-		CC_PROFILE_FUNCTION();
-
 		constexpr size_t quadVertexCount = 4;
 		const float textureIndex = 0.0f;
 		constexpr glm::vec2 textureCoords[] = {
@@ -318,8 +314,6 @@ namespace Cataclysm
 
 	void Vesuvius::DrawCircle(const glm::mat4& transform, const glm::vec4& color, float thickness, float fade, int entityID)
 	{
-		CC_PROFILE_FUNCTION();
-
 		//if (s_Data.CircleIndexCount >= VesuviusData::MaxIndices)
 		//	NextBatch();
 
@@ -398,8 +392,6 @@ namespace Cataclysm
 
 	void Vesuvius::DrawString(const std::string& string, Ref<Font> font, const glm::mat4& transform, const TextParams& textParams, int entityID)
 	{
-		CC_PROFILE_FUNCTION();
-
 		const auto& fontGeometry = font->GetMSDFData()->FontGeometry;
 		const auto& metrics = fontGeometry.getMetrics();
 

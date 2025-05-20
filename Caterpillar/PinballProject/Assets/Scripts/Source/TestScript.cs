@@ -1,4 +1,5 @@
 ﻿using Cataclysm;
+using System.Collections.Generic;
 
 namespace Pinball
 {
@@ -8,6 +9,10 @@ namespace Pinball
 		private float speed = 200.0f;
 
 		public bool IsLeft = false;
+		public Vec2 TestVec2;
+		public Vec3 TestVec3;
+		public Vec4 TestVec4;
+		public Entity TestEntity;
 
 		public void OnCreate()
 		{
@@ -16,6 +21,8 @@ namespace Pinball
 
 		public void OnUpdate(float ts)
 		{
+			Debug.Log(TestEntity.ID);
+
 			if (IsLeft)
 			{
 				if (Input.IsKeyDown(KeyCode.W) && Input.IsKeyDown(KeyCode.S))

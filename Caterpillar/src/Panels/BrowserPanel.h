@@ -19,5 +19,6 @@ namespace Cataclysm
 
 		Cataclysm::Ref<Cataclysm::Texture2D> m_DirectoryIcon;
 		Cataclysm::Ref<Cataclysm::Texture2D> m_FileIcon;
+		Cataclysm::Ref<Cataclysm::Texture2D> m_AudioFileIcon;
 	};
 }

@@ -12,6 +12,7 @@
 // cataclysm
 #include "Cataclysm/Scene/SceneSerializer.h"
 #include "Cataclysm/Scripting/ScriptEngine.h"
+#include "Cataclysm/Audio/AudioEngine.h"
 #include "Cataclysm/Math/Math.h"
 #include "Cataclysm/Utils/PlatformUtils.h"
 #include "Cataclysm/Renderer/Font.h"
@@ -35,6 +36,8 @@ namespace Cataclysm
 	void EditorLayer::OnAttach()
 	{
 		CC_PROFILE_FUNCTION();
+
+		AudioEngine::Init();
 
 		// m_CheckerboardTexture = Cataclysm::Texture2D::Create("assets/textures/Checkerboard.png");
 		// m_JackPSmithLogoTexture = Cataclysm::Texture2D::Create("assets/textures/JackPSmithLogo.png");
@@ -102,6 +105,7 @@ namespace Cataclysm
 	{
 		CC_PROFILE_FUNCTION();
 
+		AudioEngine::Shutdown();
 	}
 
 	void EditorLayer::OnUpdate(Cataclysm::Timestep ts)
@@ -340,6 +344,7 @@ namespace Cataclysm
 					ImGui::MenuItem("Frame", nullptr, &m_ShowFrameDebuggerPanel);
 					ImGui::MenuItem("Output", nullptr, &m_ShowOutputPanel);
 					ImGui::MenuItem("Profiler", nullptr, &m_ShowProfilerPanel);
+					ImGui::MenuItem("Settings", nullptr, &m_ShowSettingsPanel);
 					ImGui::MenuItem("Vesuvius", nullptr, &m_ShowVesuviusPanel);
 
 					ImGui::EndMenu();
@@ -390,6 +395,12 @@ namespace Cataclysm
 		if (m_ShowProfilerPanel)
 			m_ProfilerPanel->OnImGuiRender();
 
+		if (m_ShowSettingsPanel)
+			m_SettingsPanel->OnImGuiRender();
+
+		// if (m_ShowWelcomePanel)
+		//	m_WelcomePanel->OnImGuiRender(m_ShowWelcomePanel);
+
 		if (m_ShowVesuviusPanel)
 		{
 			ImGui::Begin("Vesuvius");
@@ -402,13 +413,6 @@ namespace Cataclysm
 
 			ImGui::End();
 		}
-
-		/*
-		ImGui::Begin("Settings");
-		ImGui::Checkbox("Show physics colliders", &m_ShowPhysicsColliders);
-		// ImGui::Image((ImTextureID)s_Font->GetAtlasTexture()->GetRendererID(), { 512,512 }, { 0, 1 }, { 1, 0 });
-		ImGui::End();
-		*/
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 

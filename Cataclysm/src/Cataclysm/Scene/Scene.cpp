@@ -7,11 +7,11 @@
 #include "Cataclysm/ECS/Entity.h"
 #include "Cataclysm/ECS/ScriptableEntity.h"
 #include "Cataclysm/Math/Math.h"
-
 #include "Cataclysm/Scripting/ScriptEngine.h"
 #include "Cataclysm/Renderer/Vesuvius/Vesuvius.h"
 #include "Cataclysm/Physics/Physics2D.h"
 #include "Cataclysm/Physics/ContactListener2D.h"
+#include "Cataclysm/Audio/AudioEngine.h"
 
 // Box2D
 #include "box2d/b2_world.h"
@@ -27,7 +27,7 @@ namespace Cataclysm
 {
 	Scene::Scene()
 	{
-
+		
 	}
 
 	Scene::~Scene()
@@ -222,6 +222,29 @@ namespace Cataclysm
 
 		OnPhysics2DStop();
 		ScriptEngine::OnRuntimeStop();
+
+		// Audio
+		{
+			auto view = m_Registry.view<AudioSourceComponent>();
+			for (auto e : view)
+			{
+				Entity entity = { e, this };
+				AudioSourceComponent& asc = entity.GetComponent<AudioSourceComponent>();
+
+				if (!asc.AudioClip && !asc.FilePath.empty())
+				{
+					asc.AudioClip = AudioEngine::LoadClip(asc.FilePath);
+					if (asc.AudioClip)
+						asc.AudioClip->SetLooping(asc.Loop);
+				}
+
+				if (asc.PlayOnStart)
+				{
+					AudioEngine::Stop(asc.AudioClip);
+					asc.IsPlaying = true;
+				}
+			}
+		}
 	}
 
 	void Scene::OnSimulationStart()
@@ -254,6 +277,30 @@ namespace Cataclysm
 				Entity e = { entity, this };
 				if (GetParent(e.GetUUID()) == 0)
 					UpdateTransformRecursive(e); // now truly recursive
+			}
+
+
+			// Audio
+			{
+				auto view = m_Registry.view<AudioSourceComponent>();
+				for (auto e : view)
+				{
+					Entity entity = { e, this };
+					AudioSourceComponent& asc = entity.GetComponent<AudioSourceComponent>();
+
+					if (!asc.AudioClip && !asc.FilePath.empty())
+					{
+						asc.AudioClip = AudioEngine::LoadClip(asc.FilePath);
+						if (asc.AudioClip)
+							asc.AudioClip->SetLooping(asc.Loop);
+					}
+
+					if (asc.PlayOnStart)
+					{
+						AudioEngine::Play(asc.AudioClip);
+						asc.IsPlaying = true;
+					}
+				}
 			}
 
 			// Update Scripts
@@ -378,6 +425,31 @@ namespace Cataclysm
 
 			m_ContactListener->Clear();
 			m_ContactListener->ClearEndCollisions();
+		}
+		else
+		{
+			// Audio
+			{
+				auto view = m_Registry.view<AudioSourceComponent>();
+				for (auto e : view)
+				{
+					Entity entity = { e, this };
+					AudioSourceComponent& asc = entity.GetComponent<AudioSourceComponent>();
+
+					if (!asc.AudioClip && !asc.FilePath.empty())
+					{
+						asc.AudioClip = AudioEngine::LoadClip(asc.FilePath);
+						if (asc.AudioClip)
+							asc.AudioClip->SetLooping(asc.Loop);
+					}
+
+					if (asc.IsPlaying)
+					{
+						AudioEngine::Pause(asc.AudioClip);
+						asc.IsPlaying = false;
+					}
+				}
+			}
 		}
 
 		// Render 2D
@@ -1150,5 +1222,16 @@ namespace Cataclysm
 	template<>
 	void Scene::OnComponentAdded<TextComponent>(Entity entity, TextComponent& component)
 	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<AudioSourceComponent>(Entity entity, AudioSourceComponent& component)
+	{
+		if (!component.FilePath.empty())
+		{
+			component.AudioClip = AudioEngine::LoadClip(component.FilePath);
+			if (component.AudioClip)
+				component.AudioClip->SetLooping(component.Loop);
+		}
 	}
 }

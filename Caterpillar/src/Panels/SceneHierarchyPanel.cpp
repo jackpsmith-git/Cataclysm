@@ -1,6 +1,7 @@
 #include "SceneHierarchyPanel.h"
 #include "Cataclysm/ECS/Components.h"
 
+#include "Cataclysm/Audio/AudioEngine.h"
 #include "Cataclysm/Scripting/ScriptEngine.h"
 #include "Cataclysm/UI/UI.h"
 
@@ -20,9 +21,36 @@
 
 namespace Cataclysm
 {
+	SceneHierarchyPanel::SceneHierarchyPanel()
+	{
+		m_AudioSourceIcon = Cataclysm::Texture2D::Create("Resources/Icons/Browser/AudioSourceIcon.png");
+		m_BoxColliderIcon = Cataclysm::Texture2D::Create("Resources/Icons/Browser/BoxColliderIcon.png");
+		m_CircleColliderIcon = Cataclysm::Texture2D::Create("Resources/Icons/Browser/CircleColliderIcon.png");
+		m_CircleRendererIcon = Cataclysm::Texture2D::Create("Resources/Icons/Browser/CircleRendererIcon.png");
+		m_EntityIcon = Cataclysm::Texture2D::Create("Resources/Icons/Browser/EntityIcon.png");
+		m_RigidbodyIcon = Cataclysm::Texture2D::Create("Resources/Icons/Browser/RigidbodyIcon.png");
+		m_ScriptIcon = Cataclysm::Texture2D::Create("Resources/Icons/Browser/ScriptIcon.png");
+		m_SpriteRendererIcon = Cataclysm::Texture2D::Create("Resources/Icons/Browser/SpriteRendererIcon.png");
+		m_TextIcon = Cataclysm::Texture2D::Create("Resources/Icons/Browser/TextIcon.png");
+		m_TransformIcon = Cataclysm::Texture2D::Create("Resources/Icons/Browser/TransformComponentIcon.png");
+		m_CameraIcon = Cataclysm::Texture2D::Create("Resources/Icons/Browser/CameraIcon.png");
+	}
+
 	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& context)
 	{
 		SetContext(context);
+
+		m_AudioSourceIcon		= Cataclysm::Texture2D::Create("Resources/Icons/Browser/AudioSourceIcon.png");
+		m_BoxColliderIcon		= Cataclysm::Texture2D::Create("Resources/Icons/Browser/BoxColliderIcon.png");
+		m_CircleColliderIcon	= Cataclysm::Texture2D::Create("Resources/Icons/Browser/CircleColliderIcon.png");
+		m_CircleRendererIcon	= Cataclysm::Texture2D::Create("Resources/Icons/Browser/CircleRendererIcon.png");
+		m_EntityIcon			= Cataclysm::Texture2D::Create("Resources/Icons/Browser/EntityIcon.png");
+		m_RigidbodyIcon			= Cataclysm::Texture2D::Create("Resources/Icons/Browser/RigidbodyIcon.png");
+		m_ScriptIcon			= Cataclysm::Texture2D::Create("Resources/Icons/Browser/ScriptIcon.png");
+		m_SpriteRendererIcon	= Cataclysm::Texture2D::Create("Resources/Icons/Browser/SpriteRendererIcon.png");
+		m_TextIcon				= Cataclysm::Texture2D::Create("Resources/Icons/Browser/TextIcon.png");
+		m_TransformIcon			= Cataclysm::Texture2D::Create("Resources/Icons/Browser/TransformComponentIcon.png");
+		m_CameraIcon			= Cataclysm::Texture2D::Create("Resources/Icons/Browser/CameraIcon.png");
 	}
 
 	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
@@ -139,11 +167,13 @@ namespace Cataclysm
 			m_SelectionContext = entity;
 		}
 
-		// === DRAG SOURCE ===
 		if (ImGui::BeginDragDropSource())
 		{
 			UUID id = entity.GetUUID();
 			ImGui::SetDragDropPayload("HIERARCHY_ENTITY_DRAG_DROP", &id, sizeof(UUID));
+			Cataclysm::Ref<Texture2D> icon = m_EntityIcon;
+			ImGui::Image((ImTextureID)icon->GetRendererID(), ImVec2(20, 20), { 0, 1 }, { 1, 0 });
+			ImGui::SameLine();
 			ImGui::Text("%s", tag.c_str());
 			ImGui::EndDragDropSource();
 		}
@@ -189,59 +219,6 @@ namespace Cataclysm
 			if (m_SelectionContext == entity)
 				m_SelectionContext = {};
 		}
-
-		/*
-		auto& tag = entity.GetComponent<TagComponent>().Tag;
-
-		ImGuiTreeNodeFlags flags = ((m_SelectionContext == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
-		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
-
-		if (!entity.GetComponent<IDComponent>().Enabled)
-			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 0.2f));
-
-		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
-
-		if (!entity.GetComponent<IDComponent>().Enabled)
-			ImGui::PopStyleColor();
-
-		if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Left) && !ImGui::IsMouseDragging(ImGuiMouseButton_Left))
-		{
-			m_SelectionContext = entity;
-		}
-
-		Entity* entityPtr = &entity;
-
-		if (ImGui::BeginDragDropSource())
-		{
-			ImGui::SetDragDropPayload("ENTITY_HIERARCHY_ITEM", entityPtr, sizeof(Entity*));
-			ImGui::EndDragDropSource();
-		}
-
-		bool entityDeleted = false;
-		if (ImGui::BeginPopupContextItem())
-		{
-			if (ImGui::MenuItem("Delete"))
-				entityDeleted = true;
-
-			ImGui::EndPopup();
-		}
-
-		if (opened)
-		{
-			//ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
-			//bool opened = ImGui::TreeNodeEx((void*)9817239, flags, tag.c_str());
-			//if (opened)
-			//	ImGui::TreePop();
-			ImGui::TreePop();
-		}
-
-		if (entityDeleted)
-		{
-			m_Context->DestroyEntity(entity);
-			if (m_SelectionContext == entity)
-				m_SelectionContext = {};
-		}
-		*/
 	}
 
 	static bool DrawVec2Control(const std::string& label, glm::vec2& values, float resetValue = 0.0f, float columnWidth = 100.0f)
@@ -461,7 +438,7 @@ namespace Cataclysm
 	}
 
 	template<typename T, typename UIFunction>
-	static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction)
+	void SceneHierarchyPanel::DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction)
 	{
 		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
 		if (entity.HasComponent<T>())
@@ -472,25 +449,84 @@ namespace Cataclysm
 			auto& component = entity.GetComponent<T>();
 			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
 
+			Cataclysm::Ref<Cataclysm::Texture2D> icon;
+
+			if constexpr (std::is_same<T, AudioSourceComponent>::value)
+			{
+				icon = m_AudioSourceIcon;
+			}
+			else if constexpr (std::is_same<T, BoxCollider2DComponent>::value)
+			{
+				icon = m_BoxColliderIcon;
+			}
+			else if constexpr (std::is_same<T, CameraComponent>::value)
+			{
+				icon = m_CameraIcon;
+			}
+			else if constexpr (std::is_same<T, CircleCollider2DComponent>::value)
+			{
+				icon = m_CircleColliderIcon;
+			}
+			else if constexpr (std::is_same<T, CircleRendererComponent>::value)
+			{
+				icon = m_CircleRendererIcon;
+			}
+			else if constexpr (std::is_same<T, MonoScriptComponent>::value)
+			{
+				icon = m_ScriptIcon;
+			}
+			else if constexpr (std::is_same<T, NativeScriptComponent>::value)
+			{
+				icon = m_ScriptIcon;
+			}
+			else if constexpr (std::is_same<T, Rigidbody2DComponent>::value)
+			{
+				icon = m_RigidbodyIcon;
+			}
+			else if constexpr (std::is_same<T, SpriteRendererComponent>::value)
+			{
+				icon = m_SpriteRendererIcon;
+			}
+			else if constexpr (std::is_same<T, TextComponent>::value)
+			{
+				icon = m_TextIcon;
+			}
+			else if constexpr (std::is_same<T, TransformComponent>::value)
+			{
+				icon = m_TransformIcon;
+			}
+			else
+			{
+				icon = m_TransformIcon;
+			}
+
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
 			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 			ImGui::Separator();
+			ImGui::Image((ImTextureID)icon->GetRendererID(), ImVec2(20, 20), { 0, 1 }, { 1, 0 });
+			ImGui::SameLine();
 			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
 			ImGui::PopStyleVar();
 			ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
 			ImGui::PushFont(boldFont);
+
+			std::string popupName = "ComponentSettings##" + std::to_string(entity.GetUUID()) + typeid(T).name();
 			if (ImGui::Button("...", ImVec2{ lineHeight, lineHeight }))
 			{
-				ImGui::OpenPopup("ComponentSettings");
+				ImGui::OpenPopup(popupName.c_str());
 			}
 			ImGui::PopFont();
 			bool removeComponent = false;
-			if (ImGui::BeginPopup("ComponentSettings"))
-			{
-				if (ImGui::MenuItem("Remove Component"))
-					removeComponent = true;
 
-				ImGui::EndPopup();
+			if (!std::is_same<T, TransformComponent>::value)
+			{
+				if (ImGui::BeginPopup(popupName.c_str()))
+				{
+					if (ImGui::MenuItem("Remove Component"))
+						removeComponent = true;
+
+					ImGui::EndPopup();
+				}
 			}
 
 			if (open)
@@ -508,6 +544,31 @@ namespace Cataclysm
 	void SceneHierarchyPanel::DisplayAddComponentEntry(const std::string& entryName) {
 		if (!m_SelectionContext.HasComponent<T>())
 		{
+			Cataclysm::Ref<Cataclysm::Texture2D> icon;
+
+			if (entryName == "AudioSource")
+				icon = m_AudioSourceIcon;
+			else if (entryName == "BoxCollider2D")
+				icon = m_BoxColliderIcon;
+			else if (entryName == "CircleCollider2D")
+				icon = m_CircleColliderIcon;
+			else if (entryName == "CircleRenderer")
+				icon = m_CircleRendererIcon;
+			else if (entryName == "MonoScript")
+				icon = m_ScriptIcon;
+			else if (entryName == "Rigidbody2D")
+				icon = m_RigidbodyIcon;
+			else if (entryName == "SpriteRenderer")
+				icon = m_SpriteRendererIcon;
+			else if (entryName == "Text")
+				icon = m_TextIcon;
+			else if (entryName == "Camera")
+				icon = m_CameraIcon;
+			else
+				icon = m_EntityIcon;
+
+			ImGui::Image((ImTextureID)icon->GetRendererID(), ImVec2(20, 20), { 0, 1 }, { 1, 0 });
+			ImGui::SameLine();
 			if (ImGui::MenuItem(entryName.c_str()))
 			{
 				m_SelectionContext.AddComponent<T>();
@@ -558,6 +619,13 @@ namespace Cataclysm
 		return "";
 	}
 
+	static bool IsAudioFile(const std::filesystem::path& path)
+	{
+		std::string ext = path.extension().string();
+		std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+		return (ext == ".wav" || ext == ".ogg" || ext == ".mp3");
+	}
+
 	void SceneHierarchyPanel::DrawComponents(Entity entity)
 	{
 		ImGuiIO& io = ImGui::GetIO();
@@ -590,13 +658,14 @@ namespace Cataclysm
 
 		if (ImGui::BeginPopup("AddComponent"))
 		{
-			DisplayAddComponentEntry<CameraComponent>("Camera");
-			DisplayAddComponentEntry<MonoScriptComponent>("MonoScript");
-			DisplayAddComponentEntry<SpriteRendererComponent>("SpriteRenderer");
-			DisplayAddComponentEntry<CircleRendererComponent>("CircleRenderer");
-			DisplayAddComponentEntry<Rigidbody2DComponent>("Rigidbody2D");
+			DisplayAddComponentEntry<AudioSourceComponent>("AudioSource");
 			DisplayAddComponentEntry<BoxCollider2DComponent>("BoxCollider2D");
+			DisplayAddComponentEntry<CameraComponent>("Camera");
 			DisplayAddComponentEntry<CircleCollider2DComponent>("CircleCollider2D");
+			DisplayAddComponentEntry<CircleRendererComponent>("CircleRenderer");
+			DisplayAddComponentEntry<MonoScriptComponent>("MonoScript");
+			DisplayAddComponentEntry<Rigidbody2DComponent>("Rigidbody2D");
+			DisplayAddComponentEntry<SpriteRendererComponent>("SpriteRenderer");
 			DisplayAddComponentEntry<TextComponent>("Text");
 
 			ImGui::EndPopup();
@@ -724,16 +793,6 @@ namespace Cataclysm
 					ImGui::EndDragDropTarget();
 				}
 
-
-
-				/*
-				if (ImGui::InputText("Class", buffer, sizeof(buffer)))
-				{
-					component.ClassName = buffer;
-					return;
-				}
-				*/
-
 				// Fields
 				bool sceneRunning = scene->IsRunning();
 				if (sceneRunning)
@@ -803,19 +862,18 @@ namespace Cataclysm
 							}
 							else if (field.Type == ScriptFieldType::Entity)
 							{
-								Entity data = scriptInstance->GetFieldValue<Entity>(name);
-
 								ImGui::Button(name.c_str(), ImVec2(100.0f, 0.0f));
 								if (ImGui::BeginDragDropTarget())
 								{
 									if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("HIERARCHY_ENTITY_DRAG_DROP"))
 									{
-										Entity* entity = (Entity*)payload->Data;
+										UUID entityID = *(const UUID*)payload->Data;
 
 										std::stringstream warning;
 										warning << "[SceneHierarchyPanel::DrawComponent<MonoScriptComponent>] " << *(UUID*)payload->Data;
 										CC_CORE_WARN(warning.str());
-										scriptInstance->SetFieldValue(name, entity);
+
+										scriptInstance->SetFieldValue(name, entityID);
 									}
 									ImGui::EndDragDropTarget();
 								}
@@ -893,15 +951,13 @@ namespace Cataclysm
 								}
 								else if (field.Type == ScriptFieldType::Entity)
 								{
-									Entity data = scriptField.GetValue<Entity>();
-
 									ImGui::Button(name.c_str(), ImVec2(100.0f, 0.0f));
 									if (ImGui::BeginDragDropTarget())
 									{
 										if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("HIERARCHY_ENTITY_DRAG_DROP"))
 										{
-											Entity* entity = (Entity*)payload->Data;
-											scriptField.SetValue(entity);
+											UUID entityID = *(const UUID*)payload->Data;
+											scriptField.SetValue(entityID);
 										}
 										ImGui::EndDragDropTarget();
 									}
@@ -988,10 +1044,10 @@ namespace Cataclysm
 									{
 										if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("HIERARCHY_ENTITY_DRAG_DROP"))
 										{
-											Entity* data = (Entity*)payload->Data;
+											UUID entityID = *(const UUID*)payload->Data;
 											ScriptFieldInstance& fieldInstance = entityFields[name];
 											fieldInstance.Field = field;
-											fieldInstance.SetValue(data);
+											fieldInstance.SetValue(entityID);
 										}
 										ImGui::EndDragDropTarget();
 									}
@@ -1062,6 +1118,50 @@ namespace Cataclysm
 			ImGui::Spacing();
 			if (ImGui::Button("Reset", ImVec2(ImGui::GetContentRegionMax().x, 20.0f)))
 				component.Reset();
+		});
+
+		DrawComponent<AudioSourceComponent>("AudioSource", entity, [](auto& component)
+		{
+			if (!component.FilePath.empty())
+				ImGui::Button(component.FilePath.c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 25));
+			else
+				ImGui::Button("AudioClip", ImVec2(ImGui::GetContentRegionAvail().x, 25));
+
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+				{
+					const wchar_t* path = static_cast<const wchar_t*>(payload->Data);
+					std::filesystem::path audioPath = path;
+
+					if (IsAudioFile(path))
+					{
+						component.FilePath = audioPath.string();
+						component.AudioClip = AudioEngine::LoadClip(audioPath.string());
+						if (component.AudioClip)
+							component.AudioClip->SetLooping(component.Loop);
+					}
+				}
+			}
+
+			ImGui::Checkbox("Loop", &component.Loop);
+			ImGui::Checkbox("Play On Start", &component.PlayOnStart);
+			if (ImGui::SliderFloat("Volume", &component.Volume, 0.0f, 1.0f, "%.2f"))
+			{
+				if (component.AudioClip && component.AudioClip->IsValid())
+					component.AudioClip->SetVolume(component.Volume);
+			}
+
+			if (component.AudioClip)
+			{
+				if (ImGui::Button("Play")) AudioEngine::Play(component.AudioClip);
+				ImGui::SameLine();
+
+				if (ImGui::Button("Pause")) AudioEngine::Pause(component.AudioClip);
+				ImGui::SameLine();
+
+				if (ImGui::Button("Stop")) AudioEngine::Stop(component.AudioClip);
+			}
 		});
 
 		DrawComponent<Rigidbody2DComponent>("Rigidbody2D", entity, [](auto& component)

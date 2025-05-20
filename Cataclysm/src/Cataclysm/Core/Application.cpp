@@ -61,8 +61,6 @@ namespace Cataclysm
 
 	void Application::OnEvent(Event& e)
 	{
-		CC_PROFILE_FUNCTION();
-
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(CC_BIND_EVENT_FN(Application::OnWindowClose));
 		dispatcher.Dispatch<WindowResizeEvent>(CC_BIND_EVENT_FN(Application::OnWindowResize));
@@ -90,16 +88,12 @@ namespace Cataclysm
 			if (!m_Minimized)
 			{
 				{
-					CC_PROFILE_SCOPE("LayerStack OnUpdate");
-
 					for (Layer* layer : m_LayerStack)
 						layer->OnUpdate(timestep);
 				}
 
 				m_ImGuiLayer->Begin();
 				{
-					CC_PROFILE_SCOPE("LayerStack OnImGuiRender");
-
 					for (Layer* layer : m_LayerStack)
 						layer->OnImGuiRender(timestep);
 				}

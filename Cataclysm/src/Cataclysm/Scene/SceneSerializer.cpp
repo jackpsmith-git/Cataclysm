@@ -4,6 +4,7 @@
 // cataclysm
 #include "Cataclysm/ECS/Entity.h"
 #include "Cataclysm/ECS/Components.h"
+#include "Cataclysm/Audio/AudioEngine.h"
 #include "Cataclysm/Scripting/ScriptEngine.h"
 #include "Cataclysm/Core/UUID.h"
 #include "Cataclysm/Project/Project.h"
@@ -400,6 +401,19 @@ namespace Cataclysm
 					out << YAML::EndMap; // TextComponent
 				}
 
+				// AUDIO COMPONENT
+				if (entity.HasComponent<AudioSourceComponent>())
+				{
+					out << YAML::Key << "AudioSourceComponent";
+					out << YAML::BeginMap;
+					auto& audioSourceComponent = entity.GetComponent<AudioSourceComponent>();
+					out << YAML::Key << "FilePath" << YAML::Value << audioSourceComponent.FilePath;
+					out << YAML::Key << "Loop" << YAML::Value << audioSourceComponent.Loop;
+					out << YAML::Key << "PlayOnStart" << YAML::Value << audioSourceComponent.PlayOnStart;
+					out << YAML::Key << "Volume" << YAML::Value << audioSourceComponent.Volume;
+					out << YAML::EndMap;
+				}
+
 				if (m_Scene->GetParent(entity.GetUUID()) != 0)
 				{
 					UUID parentID = m_Scene->GetEntityParentMap()[entity.GetUUID()];
@@ -623,6 +637,26 @@ namespace Cataclysm
 					tc.LineSpacing = textComponent["LineSpacing"].as<float>();
 					tc.FontPath = textComponent["FontPath"].as<std::string>();
 					tc.FontAsset = Font::GetFont(tc.FontPath);
+				}
+
+				auto audioSourceComponent = entity["AudioSourceComponent"];
+				if (audioSourceComponent)
+				{
+					auto& asc = deserializedEntity.AddComponent<AudioSourceComponent>();
+					asc.FilePath = audioSourceComponent["FilePath"].as<std::string>();
+					asc.Loop = audioSourceComponent["Loop"].as<bool>();
+					asc.PlayOnStart = audioSourceComponent["PlayOnStart"].as<bool>();
+					asc.Volume = audioSourceComponent["Volume"].as<float>();
+
+					if (!asc.FilePath.empty())
+					{
+						asc.AudioClip = AudioEngine::LoadClip(asc.FilePath);
+						if (asc.AudioClip)
+						{
+							asc.AudioClip->SetLooping(asc.Loop);
+							asc.AudioClip->SetVolume(asc.Volume);
+						}
+					}
 				}
 
 				if (entity["Parent"])

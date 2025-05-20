@@ -49,6 +49,7 @@ Cataclysm includes all project dependencies. Cataclysm includes the following li
     <li><a href="https://github.com/g-truc/glm">glm - OpenGL Mathematics Library</a></li>
     <li><a href="https://github.com/ocornut/imgui">ImGui - UI Library</a></li>
     <li><a href="https://github.com/CedricGuillemet/ImGuizmo">ImGuizmo - Gizmo Library</a></li>
+    <li><a href="https://miniaud.io/">miniaudio - Audio Playback and Capture Library</a><li>
     <li><a href="https://www.mono-project.com/">Mono - .NET Runtime</a></li>
     <li><a href="https://github.com/Chlumsky/msdf-atlas-gen">msdf-atlas-gen - MSDF Font Atlas Generation Utility</a></li>
     <li><a href="https://github.com/gabime/spdlog">spdlog - C++ Logging Library</a></li>
@@ -61,6 +62,14 @@ Cataclysm includes all project dependencies. Cataclysm includes the following li
 After cloning the latest version of Cataclysm, run Scripts/Win-GenProjects.bat to generate project files for Visual Studio 2022. Currently you can test Cataclysm through your IDE, however complete instructions for compiling binaries are coming soon. Thank you for your patience and for helping to improve Cataclysm!
 
 ## Changelog
+
+v1.0.2
+<ul>
+    <li>Audio Rendering</li>
+    <li>Audio Source Component</li>
+    <li>UI Icons</li>
+    <li>Bug Fixes</li>
+</ul>
 
 v1.0.1
 <ul>

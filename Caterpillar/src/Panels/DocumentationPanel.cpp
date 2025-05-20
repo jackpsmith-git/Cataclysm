@@ -14,6 +14,17 @@ namespace Cataclysm
 
 	std::vector<DocEntry> DocumentationPanel::s_Documentation = {
 	{
+		"Cataclysm.AudioSourceComponent",
+		"CCML/Source/Cataclysm/ECS/AudioSourceComponent.cs",
+		"Cataclysm AudioSource Component.",
+		{},
+		{
+			{ "Play()", "void", "Plays the audio clip" },
+			{ "Pause()", "void", "Pauses the audio clip" },
+			{ "Stop()", "void", "Stops the audio clip" }
+		}
+	},
+	{
 		"Cataclysm.BoxCollider2DComponent",
 		"CCML/Source/Cataclysm/ECS/BoxCollider2DComponent.cs",
 		"Cataclysm BoxCollider2D Component.",

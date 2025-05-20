@@ -15,6 +15,8 @@ namespace Cataclysm
 			ID = id;
 		}
 
+		static internal Entity CreateInternal(ulong id) => new Entity(id);
+
 		public bool Enabled
 		{
 			get => InternalCalls.Entity_GetEnabled(ID);
@@ -182,6 +184,10 @@ namespace Cataclysm
 			{
 				InternalCalls.Entity_RemoveTextComponent(ID);
 			}
+			else if (typeof(T) == typeof(AudioSourceComponent))
+			{
+				InternalCalls.Entity_RemoveAudioSourceComponent(ID);
+			}
 			else
 			{
 				Debug.Error("[Entity.RemoveComponent] '" + typeof(T) + "' is not a valid component type.");
@@ -246,6 +252,10 @@ namespace Cataclysm
 			{
 				InternalCalls.Entity_AddTextComponent(ID);
 			}
+			else if (typeof(T) == typeof(AudioSourceComponent))
+			{
+				InternalCalls.Entity_AddAudioSourceComponent(ID);
+			}
 			else
 			{
 				Debug.Error("[Entity.AddComponent] '" + typeof(T).ToString() + "' is not a valid component type.");
@@ -287,6 +297,9 @@ namespace Cataclysm
 		public static bool operator !=(Entity entity1, Entity entity2) => entity1.ID != entity2.ID;
 		public override int GetHashCode() => (int)ID;
 		public bool Equals(Entity other) => ID == other.ID;
+
+		public static implicit operator ulong(Entity e) => e?.ID ?? 0;
+		public static implicit operator Entity(ulong id) => new Entity(id);
 
 		public override bool Equals(object obj)
 		{

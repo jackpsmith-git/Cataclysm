@@ -72,7 +72,12 @@ Entities:
     ScriptComponent:
       ClassName: Pinball.TestScript
       ScriptFields:
-        []
+        - Name: TestEntity
+          Type: Entity
+          Data: 9341139020355923487
+        - Name: TestVec2
+          Type: Vec2
+          Data: [17.7999992, 0]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
       TilingFactor: 1
@@ -103,6 +108,9 @@ Entities:
         - Name: IsLeft
           Type: Bool
           Data: true
+        - Name: TestEntity
+          Type: Entity
+          Data: 9341139020355923487
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
       TilingFactor: 1

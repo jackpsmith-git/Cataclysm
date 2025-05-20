@@ -254,6 +254,35 @@ namespace Cataclysm
 		}
 	};
 
+	class AudioClip;
+
+	struct AudioSourceComponent
+	{
+		bool SceneManaged = false;
+		bool WasPlayingBeforePause = false;
+		
+		std::string FilePath;
+		Ref<AudioClip> AudioClip = nullptr;
+
+		float Volume = 1.0f;
+		bool Loop = false;
+		bool PlayOnStart = false;
+		bool IsPlaying = false;
+
+		AudioSourceComponent() = default;
+		AudioSourceComponent(const AudioSourceComponent&) = default;
+
+		void Reset()
+		{
+			FilePath.clear();
+			Loop = false;
+			PlayOnStart = false;
+			AudioClip = nullptr;
+			IsPlaying = false;
+			Volume = 1.0f;
+		}
+	};
+
 	template<typename... Component>
 	struct ComponentGroup
 	{
@@ -263,5 +292,5 @@ namespace Cataclysm
 		ComponentGroup<TransformComponent, SpriteRendererComponent,
 		CircleRendererComponent, CameraComponent, MonoScriptComponent,
 		NativeScriptComponent, Rigidbody2DComponent, BoxCollider2DComponent,
-		CircleCollider2DComponent, TextComponent>; 
+		CircleCollider2DComponent, TextComponent, AudioSourceComponent>; 
 }

@@ -29,36 +29,26 @@ namespace Cataclysm
 
 	OpenGLVertexArray::OpenGLVertexArray()
 	{
-		CC_PROFILE_FUNCTION();
-
 		glCreateVertexArrays(1, &m_RendererID);
 	}
 
 	OpenGLVertexArray::~OpenGLVertexArray()
 	{
-		CC_PROFILE_FUNCTION();
-
 		glDeleteVertexArrays(1, &m_RendererID);
 	}
 
 	void OpenGLVertexArray::Bind() const
 	{
-		CC_PROFILE_FUNCTION();
-
 		glBindVertexArray(m_RendererID);
 	}
 
 	void OpenGLVertexArray::Unbind() const
 	{
-		CC_PROFILE_FUNCTION();
-
 		glBindVertexArray(0);
 	}
 
 	void OpenGLVertexArray::AddVertexBuffer(const Cataclysm::Ref<VertexBuffer>& vertexBuffer)
 	{
-		CC_PROFILE_FUNCTION();
-
 		CC_CORE_ASSERT(vertexBuffer->GetLayout().GetElements().size(), "Vertex Buffer has no layout!");
 
 		glBindVertexArray(m_RendererID);
@@ -128,8 +118,6 @@ namespace Cataclysm
 
 	void OpenGLVertexArray::SetIndexBuffer(const Cataclysm::Ref<IndexBuffer>& indexBuffer)
 	{
-		CC_PROFILE_FUNCTION();
-
 		glBindVertexArray(m_RendererID);
 		indexBuffer->Bind();
 
