@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
+
+using Cataclysm.Math;
 
 namespace Cataclysm
 {
@@ -23,11 +24,11 @@ namespace Cataclysm
 			set => InternalCalls.Entity_SetEnabled(ID, value);
 		}
 
-		public TransformComponent Transform
+		public Transform Transform
 		{
 			get
 			{
-				return GetComponent<TransformComponent>();
+				return GetComponent<Transform>();
 			}
 			private set { }
 		}
@@ -73,42 +74,85 @@ namespace Cataclysm
 			}
 		}
 
+		/// <summary>
+		/// Translates the entity by the given translation
+		/// </summary>
+		/// <param name="translation"></param>
+		/// <returns><see langword="void"/></returns>
 		public void Translate(Vec3 translation)
 		{
 			Translation += translation;
 		}
 
+		/// <summary>
+		/// Rotates the entity by the given rotation
+		/// </summary>
+		/// <param name="rotation"></param>
+		/// <returns><see langword="void"/></returns>
 		public void Rotate(Vec3 rotation)
 		{
 			Rotation += rotation;
 		}
 
+		/// <summary>
+		/// Sets the entity's parent
+		/// </summary>
+		/// <param name="parent"></param>
+		/// <returns><see langword="void"/></returns>
 		public void SetParent(Entity parent) => InternalCalls.Entity_SetParent(ID, parent.ID);
+
+		/// <summary>
+		/// Removes the entity's parent
+		/// </summary>
+		/// <returns><see langword="void"/></returns>
 		public void RemoveParent() => InternalCalls.Entity_RemoveParent(ID);
 		
+		/// <summary>
+		/// Gets the entity's parent
+		/// </summary>
+		/// <returns>Parent <see cref="Entity"/></returns>
 		public Entity GetParent()
 		{
 			InternalCalls.Entity_GetParent(ID, out ulong id);
 			return new Entity(id);
 		}
 
+		/// <summary>
+		/// Instantiates an empty <see cref="Entity"/> in the scene and returns it
+		/// </summary>
+		/// <returns><see langword="new"/> <see cref="Entity"/></returns>
+		public static Entity Instantiate()
+		{
+			InternalCalls.Entity_InstantiateEmptyWithoutName(out ulong entityID);
+			return new Entity(entityID);
+		}
+
+		/// <summary>
+		/// Instantiates an empty <see cref="Entity"/> in the scene with the given name and returns it
+		/// </summary>
+		/// <param name="name"></param>
+		/// <returns><see langword="new"/> <see cref="Entity"/></returns>
 		public static Entity Instantiate(string name = "NewEntity")
 		{
 			InternalCalls.Entity_InstantiateEmpty(name, out ulong entityID);
 			return new Entity(entityID);
 		}
 
+		/// <summary>
+		/// Instnatiates an empty <see cref="Entity"/> in the scene with the given name as a child of the given parent and returns it
+		/// </summary>
+		/// <param name="parent"></param>
+		/// <param name="name"></param>
+		/// <returns><see langword="new"/> <see cref="Entity"/></returns>
 		public static Entity Instantiate(Entity parent, string name = "NewEntity")
 		{
 			InternalCalls.Entity_InstantiateEmptyAsChild(name, parent.ID, out ulong entityID);
 			return new Entity(entityID);
 		}
 
-		/// <summary>
-		/// Checks if the entity has a component of type T
-		/// </summary>
-		/// <typeparam name="T">Component Type</typeparam>
-		/// <returns>True if entity has component of type "T", otherwise returns false</returns>
+
+		/// <typeparam name="T"></typeparam>
+		/// <returns><see langword="true"/> if he entity has a component of type T, otherwise <see langword="false"/></returns>
         public bool HasComponent<T>() where T : Component, new()
         {
             Type componentType = typeof(T);
@@ -116,11 +160,11 @@ namespace Cataclysm
         }
 
 		/// <summary>
-		/// Checks if the entity has a component of type T and returns it
+		/// Gets a <see cref="Component"/> of the given type
 		/// </summary>
-		/// <typeparam name="T">Component Type</typeparam>
-		/// <returns>Component of type "T" if the entity has it, otherwise returns null</returns>
-        public T GetComponent<T>() where T : Component, new()
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		public T GetComponent<T>() where T : Component, new()
         {
 			if (!HasComponent<T>())
 			{
@@ -132,24 +176,29 @@ namespace Cataclysm
             return component;
         }
 
+		/// <summary>
+		/// Removes a <see cref="Component"/> of the given type, if the entity has it
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns><see langword="void"/></returns>
 		public void RemoveCommponent<T>() where T : Component, new()
 		{
-			if (typeof(T) == typeof(NativeScriptComponent))
+			if (typeof(T) == typeof(NativeScript))
 			{
 				Debug.Error("[Entity.RemoveComponent] Cannot remove NativeScriptComponent at runtime.");
 				return;
 			}
-			else if (typeof(T) == typeof(MonoScriptComponent))
+			else if (typeof(T) == typeof(MonoScript))
 			{
 				Debug.Error("[Entity.RemoveComponent] Cannot remove MonoScriptComponent at runtime.");
 				return;
 			}
-			else if (typeof(T) == typeof(TransformComponent))
+			else if (typeof(T) == typeof(Transform))
 			{
 				Debug.Error("[Entity.RemoveComponent] Cannot manually remove TransformComponent.");
 				return;
 			}
-			else if (typeof(T) == typeof(Rigidbody2DComponent))
+			else if (typeof(T) == typeof(Rigidbody2D))
 			{
 				Debug.Error("[Entity.RemoveComponent] Cannot remove Rigidbody2DComponent at runtime.");
 				return;
@@ -160,31 +209,31 @@ namespace Cataclysm
 				return;
 			}
 
-			if (typeof(T) == typeof(BoxCollider2DComponent))
+			if (typeof(T) == typeof(BoxCollider2D))
 			{
 				InternalCalls.Entity_RemoveBoxCollider2DComponent(ID);
 			}
-			else if (typeof(T) == typeof(CameraComponent))
+			else if (typeof(T) == typeof(Camera))
 			{
 				InternalCalls.Entity_RemoveCameraComponent(ID);
 			}
-			else if (typeof(T) == typeof(CircleCollider2DComponent))
+			else if (typeof(T) == typeof(CircleCollider2D))
 			{
 				InternalCalls.Entity_RemoveCircleCollider2DComponent(ID);
 			}
-			else if (typeof(T) == typeof(CircleRendererComponent))
+			else if (typeof(T) == typeof(CircleRenderer))
 			{
 				InternalCalls.Entity_RemoveCircleRendererComponent(ID);
 			}
-			else if (typeof(T) == typeof(SpriteRendererComponent))
+			else if (typeof(T) == typeof(SpriteRenderer))
 			{
 				InternalCalls.Entity_RemoveSpriteRendererComponent(ID);
 			}
-			else if (typeof(T) == typeof(SpriteRendererComponent))
+			else if (typeof(T) == typeof(SpriteRenderer))
 			{
 				InternalCalls.Entity_RemoveTextComponent(ID);
 			}
-			else if (typeof(T) == typeof(AudioSourceComponent))
+			else if (typeof(T) == typeof(AudioSource))
 			{
 				InternalCalls.Entity_RemoveAudioSourceComponent(ID);
 			}
@@ -196,28 +245,28 @@ namespace Cataclysm
 		}
 
 		/// <summary>
-		/// Adds a component of type T if it does not already exist and returns it
+		/// Adds a component of the given type, if the entity does not already have it
 		/// </summary>
-		/// <typeparam name="T">Component Type</typeparam>
-		/// <returns></returns>
+		/// <typeparam name="T"></typeparam>
+		/// <returns><see langword="new"/> <see cref="Component"/></returns>
 		public T AddComponent<T>() where T : Component, new()
 		{
-			if (typeof(T) == typeof(NativeScriptComponent))
+			if (typeof(T) == typeof(NativeScript))
 			{
 				Debug.Error("[Entity.AddComponent] Cannot add NativeScriptComponent at runtime.");
 				return null;
 			}
-			else if (typeof(T) == typeof(MonoScriptComponent))
+			else if (typeof(T) == typeof(MonoScript))
 			{
 				Debug.Error("[Entity.AddComponent] Cannot add MonoScriptComponent at runtime.");
 				return null;
 			}
-			else if (typeof(T) == typeof(TransformComponent))
+			else if (typeof(T) == typeof(Transform))
 			{
 				Debug.Error("[Entity.AddComponent] Cannot manually add TransformComponent.");
 				return null;
 			}
-			else if (typeof(T) == typeof(Rigidbody2DComponent))
+			else if (typeof(T) == typeof(Rigidbody2D))
 			{
 				Debug.Error("[Entity.AddComponent] Cannot add Rigidbody2DComponent at runtime.");
 				return null;
@@ -228,31 +277,31 @@ namespace Cataclysm
 				return null;
 			}
 
-			if (typeof(T) == typeof(BoxCollider2DComponent))
+			if (typeof(T) == typeof(BoxCollider2D))
 			{
 				InternalCalls.Entity_AddBoxCollider2DComponent(ID);
 			}
-			else if (typeof(T) == typeof(CameraComponent))
+			else if (typeof(T) == typeof(Camera))
 			{
 				InternalCalls.Entity_AddCameraComponent(ID);
 			}
-			else if (typeof(T) == typeof(CircleCollider2DComponent))
+			else if (typeof(T) == typeof(CircleCollider2D))
 			{
 				InternalCalls.Entity_AddCircleCollider2DComponent(ID);
 			}
-			else if (typeof(T) == typeof(CircleRendererComponent))
+			else if (typeof(T) == typeof(CircleRenderer))
 			{
 				InternalCalls.Entity_AddCircleRendererComponent(ID);
 			}
-			else if (typeof(T) == typeof(SpriteRendererComponent))
+			else if (typeof(T) == typeof(SpriteRenderer))
 			{
 				InternalCalls.Entity_AddSpriteRendererComponent(ID);
 			}
-			else if (typeof(T) == typeof(SpriteRendererComponent))
+			else if (typeof(T) == typeof(SpriteRenderer))
 			{
 				InternalCalls.Entity_AddTextComponent(ID);
 			}
-			else if (typeof(T) == typeof(AudioSourceComponent))
+			else if (typeof(T) == typeof(AudioSource))
 			{
 				InternalCalls.Entity_AddAudioSourceComponent(ID);
 			}
@@ -265,13 +314,17 @@ namespace Cataclysm
 			return GetComponent<T>();
 		}
 
+		/// <summary>
+		/// Destroys the given <see cref="Entity"/> and removes it from the scene
+		/// </summary>
+		/// <param name="entity"></param>
+		/// <returns><see langword="void"/></returns>
 		public static void Destroy(Entity entity) => InternalCalls.Entity_Destroy(entity.ID);
 
 		/// <summary>
-		/// Finds an entity with the given name
+		/// Finds the first <see cref="Entity"/> in the scene with the given name, if it exists, and returns it
 		/// </summary>
-		/// <param name="name">Entity name</param>
-		/// <returns>Entity if found, otherwise returns null</returns>
+		/// <param name="name"></param>
 		public static Entity FindEntityByName(string name)
 		{
 			ulong entityID = InternalCalls.Entity_FindEntityByName(name);

@@ -1,11 +1,17 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
+using Cataclysm.Math;
+using Cataclysm.Input;
+
 namespace Cataclysm
 {
     public static class InternalCalls
     {
 		#region Entity
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void Entity_InstantiateEmptyWithoutName(out ulong entityID);
+
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
 		internal extern static void Entity_InstantiateEmpty(string name, out ulong entityID);
 
@@ -89,6 +95,9 @@ namespace Cataclysm
 		#endregion
 
 		#region AudioSourceComponent
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void AudioSourceComponent_SetAudioClip(ulong entityID, ulong assetID);
+
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
 		internal extern static void AudioSourceComponent_Play(ulong entityID);
 
@@ -195,10 +204,10 @@ namespace Cataclysm
 		internal extern static void Rigidbody2DComponent_SetLinearVelocity(ulong entityID, ref Vec2 linearVelocity);
 
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
-		internal extern static Rigidbody2DComponent.BodyType Rigidbody2DComponent_GetType(ulong entityID);
+		internal extern static Rigidbody2D.BodyType Rigidbody2DComponent_GetType(ulong entityID);
 
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
-		internal extern static void Rigidbody2DComponent_SetType(ulong entityID, Rigidbody2DComponent.BodyType type);
+		internal extern static void Rigidbody2DComponent_SetType(ulong entityID, Rigidbody2D.BodyType type);
 
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static void Rigidbody2DComponent_ApplyLinearImpulseToCenter(ulong entityID, ref Vec2 impulse, bool wake);
@@ -243,6 +252,9 @@ namespace Cataclysm
 		#endregion
 
 		#region TextComponent
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void TextComponent_SetFont(ulong entityID, ulong assetID);
+
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
 		internal extern static string TextComponent_GetText(ulong entityID);
 
@@ -297,6 +309,9 @@ namespace Cataclysm
 
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
 		internal extern static void SpriteRendererComponent_SetTilingFactor(ulong entityID, float tilingFactor);
+
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		internal extern static void SpriteRendererComponent_SetTexture(ulong entityID, ulong assetID);
 
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
 		internal extern static void SpriteRendererComponent_Reset(ulong entityID);

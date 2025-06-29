@@ -4,7 +4,7 @@ project "CCML"
 	dotnetframework "4.7.2"
 	buildoptions{"/utf-8"}
 
-	targetdir ("../Caterpillar/Resources/Scripts")
+	targetdir ("../Caterpillar")
 	objdir ("../Caterpillar/Resources/Intermediates")
 
 	files

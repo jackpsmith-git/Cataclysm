@@ -6,14 +6,13 @@
     <img src="Resources/CataclysmWordmark.png">
 </a>
 
-Cataclysm is a cross-platform 2D rendering and game development engine written in C++. Included
+Cataclysm is a Windows-only, 2D rendering and game development engine written in C++. Included
 with the Cataclysm Engine is Caterpillar, the visual editor for Cataclysm, as well as the Cataclysm
 Core Mono Library (CCML);
 
 The default renderer included with Cataclysm is Vesuvius, a 2D renderer that currently supports OpenGL.
 
-Cataclysm supports C# scripting with Mono, an open-source implementation of .NET, as well as native
-scripting in C++.
+Cataclysm supports C# scripting with Mono, an open-source implementation of .NET. Native C++ scripting has been deprecated as of v2.0.0.
 </div>
 
 <details>
@@ -49,7 +48,7 @@ Cataclysm includes all project dependencies. Cataclysm includes the following li
     <li><a href="https://github.com/g-truc/glm">glm - OpenGL Mathematics Library</a></li>
     <li><a href="https://github.com/ocornut/imgui">ImGui - UI Library</a></li>
     <li><a href="https://github.com/CedricGuillemet/ImGuizmo">ImGuizmo - Gizmo Library</a></li>
-    <li><a href="https://miniaud.io/">miniaudio - Audio Playback and Capture Library</a><li>
+    <li><a href="https://miniaud.io/">miniaudio - Audio Playback and Capture Library</a></li>
     <li><a href="https://www.mono-project.com/">Mono - .NET Runtime</a></li>
     <li><a href="https://github.com/Chlumsky/msdf-atlas-gen">msdf-atlas-gen - MSDF Font Atlas Generation Utility</a></li>
     <li><a href="https://github.com/gabime/spdlog">spdlog - C++ Logging Library</a></li>
@@ -62,6 +61,18 @@ Cataclysm includes all project dependencies. Cataclysm includes the following li
 After cloning the latest version of Cataclysm, run Scripts/Win-GenProjects.bat to generate project files for Visual Studio 2022. Currently you can test Cataclysm through your IDE, however complete instructions for compiling binaries are coming soon. Thank you for your patience and for helping to improve Cataclysm!
 
 ## Changelog
+
+v2.0.0
+<ul>
+    <li>Additional Field Serialization Types Supported</li>
+    <li>Asset System</li>
+    <li>Improved XML Comments</li>
+    <li>Project Creation</li>
+    <li>Project Resources</li>
+    <li>UI Overhaul</li>
+    <li>Code Refactor</li>
+    <li>Bug Fixes</li>
+</ul>
 
 v1.0.2
 <ul>
@@ -91,9 +102,7 @@ v1.0.1
 
 ## Documentation
 
-Since C# will be the primary scripting language for Cataclysm, documentation is only be provided for the Cataclysm Core Mono Library (CCML). Some XML documentation may be found throughout the C++ source code for help with C++ scripting, however it is highly recommended that you use C# for all Cataclysm projects. C++ scripting is only supported because the engine is written in C++ and the NativeScript component may be deprecated in a future release.
-
-CCML documentation is available at <a href="https://jackpsmith.com/cataclysm/docs">jackpsmith.com/cataclysm/docs</a>. Additionally, the documentation is stored offline in-engine.
+CCML documentation is available at <a href="https://jackpsmith.com/cataclysm/docs">jackpsmith.com/cataclysm/docs</a>.
 
 ## License
 

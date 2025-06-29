@@ -7,18 +7,20 @@ project "Caterpillar"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("obj/" .. outputdir .. "/%{prj.name}")
-	icon ("%{wks.location}/Resources/CataclysmIcon.ico")
+	icon ("%{wks.location}/CataclysmIcon.ico")
 
 	files
 	{
-		"src/**.h",
-		"src/**.cpp"
+		"include/**.h",
+		"src/**.cpp",
+		"include/**.rc"
 	}
 
 	includedirs
 	{
+		"include",
 		"%{wks.location}/Cataclysm/vendor/spdlog/include",
-		"%{wks.location}/Cataclysm/src",
+		"%{wks.location}/Cataclysm/include",
 		"%{wks.location}/Cataclysm/vendor",
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.filewatch}",
